@@ -2,7 +2,7 @@ modules = ["python-3.11", "postgresql-16"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["freetype", "glibcLocales", "libxcrypt", "pkg-config", "xsimd"]
+packages = ["ffmpeg-full", "freetype", "glibcLocales", "libxcrypt", "pkg-config", "xsimd"]
 
 [deployment]
 deploymentTarget = "autoscale"
