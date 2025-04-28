@@ -7,8 +7,10 @@ dependencies = [
     "numpy>=2.2.5",
     "pandas>=2.2.3",
     "plotly>=6.0.1",
+    "psycopg2-binary>=2.9.10",
     "reportlab>=4.4.0",
     "scikit-learn>=1.6.1",
     "scipy>=1.15.2",
+    "sqlalchemy>=2.0.40",
     "streamlit>=1.44.1",
 ]

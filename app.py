@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 from utils.data_processor import DataProcessor
 from utils.visualizer import Visualizer
 from utils.pdf_generator import PDFGenerator
+import database as db
 
 # Page configuration
 st.set_page_config(
