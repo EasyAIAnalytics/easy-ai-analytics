@@ -18,8 +18,13 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# App title and description
-st.title("Business Analytics & Data Analytics")
+# Load custom CSS
+with open('assets/styles.css') as f:
+    st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+
+# App title and description with custom styling
+st.markdown('<h1 class="main-header">Business Analytics & Data Analytics</h1>', unsafe_allow_html=True)
+st.markdown('<p class="sub-header">Transform your data into actionable insights with our powerful analytics platform</p>', unsafe_allow_html=True)
 
 # Create assets directory if it doesn't exist
 if not os.path.exists("assets"):
@@ -31,15 +36,19 @@ if os.path.exists("assets/logo.svg"):
         st.image("assets/logo.svg", width=100)
 
 with st.expander("How It Works (explained simply):", expanded=True):
+    st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
     st.markdown("""
-    1. User uploads a CSV file
-    2. System shows rows, columns, missing values (bar chart)
-    3. System shows column distributions (pie chart)
-    4. User can clean missing data
-    5. Auto-insights suggest what the data needs
-    6. User fills a business requirement form
-    7. User can download filled form as beautiful PDF
-    """)
+    <h3 style="color:#3366FF">📊 Your Data Journey</h3>
+    
+    1. 📂 **Upload** your CSV file or use our sample data
+    2. 🔍 **Explore** your data with automatic statistics and visualizations
+    3. 🧹 **Clean** missing values and detect outliers with one click
+    4. 📈 **Visualize** your data with beautiful interactive charts
+    5. 💡 **Discover** insights automatically generated from your data
+    6. 📝 **Generate** professional PDF reports for your business needs
+    7. 💾 **Save** your datasets, insights and reports in the database
+    """, unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # Initialize session state variables if they don't exist
 if 'data' not in st.session_state:
@@ -90,7 +99,7 @@ def create_sample_data():
 
 # Sidebar for file upload and operations
 with st.sidebar:
-    st.subheader("1. Get Your Data")
+    st.markdown('<h3 style="color:#3366FF; margin-bottom:15px;">1. Get Your Data</h3>', unsafe_allow_html=True)
     
     # Two tabs for uploading or using sample data
     data_tab1, data_tab2 = st.tabs(["Upload CSV", "Use Sample Data"])
@@ -179,25 +188,54 @@ if st.session_state.data is not None:
         st.subheader("Data Sample")
         st.dataframe(st.session_state.cleaned_data.head(5))
         
-        # Data statistics
+        # Data statistics with styling
         st.subheader("Data Statistics")
-        col1, col2 = st.columns(2)
-        with col1:
-            st.metric("Total Rows", st.session_state.cleaned_data.shape[0])
-            st.metric("Total Columns", st.session_state.cleaned_data.shape[1])
-        with col2:
-            st.metric("Missing Values", st.session_state.cleaned_data.isna().sum().sum())
-            st.metric("Duplicate Rows", st.session_state.cleaned_data.duplicated().sum())
+        st.markdown('<div class="dashboard-card" style="padding: 10px;">', unsafe_allow_html=True)
+        
+        col1, col2, col3, col4 = st.columns(4)
+        
+        if st.session_state.cleaned_data is not None:
+            with col1:
+                st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+                st.markdown(f'<p class="metric-value">{st.session_state.cleaned_data.shape[0]}</p>', unsafe_allow_html=True)
+                st.markdown('<p class="metric-label">Total Rows</p>', unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
+                
+            with col2:
+                st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+                st.markdown(f'<p class="metric-value">{st.session_state.cleaned_data.shape[1]}</p>', unsafe_allow_html=True)
+                st.markdown('<p class="metric-label">Total Columns</p>', unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
+                
+            with col3:
+                missing = st.session_state.cleaned_data.isna().sum().sum()
+                st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+                st.markdown(f'<p class="metric-value">{missing}</p>', unsafe_allow_html=True)
+                st.markdown('<p class="metric-label">Missing Values</p>', unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
+                
+            with col4:
+                duplicates = st.session_state.cleaned_data.duplicated().sum()
+                st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+                st.markdown(f'<p class="metric-value">{duplicates}</p>', unsafe_allow_html=True)
+                st.markdown('<p class="metric-label">Duplicate Rows</p>', unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown('</div>', unsafe_allow_html=True)
         
         # Display column info
         st.subheader("Column Information")
-        column_info = pd.DataFrame({
-            'Column': st.session_state.cleaned_data.columns,
-            'Data Type': st.session_state.cleaned_data.dtypes.values,
-            'Missing Values': st.session_state.cleaned_data.isna().sum().values,
-            'Unique Values': [st.session_state.cleaned_data[col].nunique() for col in st.session_state.cleaned_data.columns]
-        })
-        st.dataframe(column_info)
+        if st.session_state.cleaned_data is not None:
+            column_info = pd.DataFrame({
+                'Column': st.session_state.cleaned_data.columns,
+                'Data Type': st.session_state.cleaned_data.dtypes.values,
+                'Missing Values': st.session_state.cleaned_data.isna().sum().values,
+                'Unique Values': [st.session_state.cleaned_data[col].nunique() for col in st.session_state.cleaned_data.columns]
+            })
+            # Apply styling to the dataframe
+            st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
+            st.dataframe(column_info, use_container_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
     
     with tab2:
         st.header("Data Visualizations")
