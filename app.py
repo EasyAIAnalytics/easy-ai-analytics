@@ -48,20 +48,6 @@ with st.expander("How It Works (explained simply):", expanded=True):
     6. 📝 **Generate** professional PDF reports for your business needs
     7. 💾 **Save** your datasets, insights and reports in the database
     """, unsafe_allow_html=True)
-    
-    st.markdown('<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">', unsafe_allow_html=True)
-    st.markdown("""
-    <h3 style="color:#3366FF">👨‍💼 Designed for Analysts</h3>
-    <p>This dashboard is built to support the complete workflow of both Data Analysts and Business Analysts:</p>
-    
-    <ul>
-    <li><strong>Data Analysts</strong> can clean, explore, analyze, and visualize datasets to uncover patterns and statistical insights</li>
-    <li><strong>Business Analysts</strong> can translate data findings into business implications and generate reports for stakeholders</li>
-    </ul>
-    
-    <p>Visit the <a href="analyst_roles" target="_self">Analyst Roles</a> page to learn more about analyst workflows and methodologies.</p>
-    """, unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 # Initialize session state variables if they don't exist
