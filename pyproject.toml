@@ -18,6 +18,7 @@ dependencies = [
     "scipy>=1.15.2",
     "sqlalchemy>=2.0.40",
     "statsmodels>=0.14.4",
+    "streamlit-javascript>=0.1.5",
     "streamlit>=1.44.1",
     "trafilatura>=2.0.0",
 ]

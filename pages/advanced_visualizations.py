@@ -309,11 +309,8 @@ def plotly_events(fig, click_event=True, select_event=False, hover_event=False):
     </script>
     """
     
-    # Create a placeholder for the chart
-    chart_placeholder = st.empty()
-    
-    # Inject HTML/JS code and render the chart
-    chart_placeholder.components.html(js_code, height=fig.layout.height or 600)
+    # Inject HTML/JS code and render the chart using st.components.html()
+    st.components.html(js_code, height=fig.layout.height or 600)
     
     # Create a placeholder for receiving events via streamlit-javascript-eval
     event_data = st.session_state.get('plotly_event_data', [])
