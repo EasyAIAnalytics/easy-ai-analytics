@@ -134,7 +134,7 @@ with st.sidebar:
     
     # Only show these options if data is loaded
     if st.session_state.data is not None:
-        st.subheader("2. Data Operations")
+        st.markdown('<h3 style="color:#3366FF; margin-bottom:15px; margin-top:20px;">2. Data Operations</h3>', unsafe_allow_html=True)
         
         # Data cleaning options
         clean_option = st.selectbox(
@@ -159,7 +159,7 @@ with st.sidebar:
             st.success("Data cleaning applied!")
             
         # Outlier detection
-        st.subheader("3. Outlier Detection")
+        st.markdown('<h3 style="color:#3366FF; margin-bottom:15px; margin-top:20px;">3. Outlier Detection</h3>', unsafe_allow_html=True)
         
         if st.session_state.cleaned_data is not None:
             numeric_cols = st.session_state.cleaned_data.select_dtypes(include=['int64', 'float64']).columns.tolist()
@@ -182,7 +182,7 @@ if st.session_state.data is not None:
     tab1, tab2, tab3, tab4 = st.tabs(["Data Overview", "Visualizations", "Insights", "Report Generation"])
     
     with tab1:
-        st.header("Data Overview")
+        st.markdown('<h2 style="color:#1E2A78; text-align:center; margin-bottom:20px; padding:10px; border-bottom:2px solid #3366FF;">Data Overview</h2>', unsafe_allow_html=True)
         
         # Data summary
         st.subheader("Data Sample")
