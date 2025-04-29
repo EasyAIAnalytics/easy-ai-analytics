@@ -818,6 +818,19 @@ else:
                             # Prepare mapping data
                             map_data = df.copy()
                             
+                            # Convert coordinates to numeric if not already
+                            for col in [lat_column, lon_column]:
+                                if not pd.api.types.is_numeric_dtype(map_data[col]):
+                                    map_data[col] = pd.to_numeric(map_data[col], errors='coerce')
+                            
+                            # Check if value column is selected and is numeric
+                            if value_column != "None":
+                                if not pd.api.types.is_numeric_dtype(map_data[value_column]):
+                                    # Try to convert to numeric, coerce errors to NaN
+                                    map_data[value_column] = pd.to_numeric(map_data[value_column], errors='coerce')
+                                    # Notify user
+                                    st.info(f"Converted '{value_column}' to numeric data. Non-numeric values will be treated as missing.")
+                            
                             # Filter out invalid coordinates
                             valid_coords = (map_data[lat_column].notna() & 
                                           map_data[lon_column].notna() &
@@ -1135,6 +1148,14 @@ else:
                         
                         # Create geocoding results
                         geocoded_data = df_sample.copy()
+                        
+                        # Check if value column is selected and is numeric
+                        if value_column != "None":
+                            if not pd.api.types.is_numeric_dtype(geocoded_data[value_column]):
+                                # Try to convert to numeric, coerce errors to NaN
+                                geocoded_data[value_column] = pd.to_numeric(geocoded_data[value_column], errors='coerce')
+                                # Notify user
+                                st.info(f"Converted '{value_column}' to numeric data. Non-numeric values will be treated as missing.")
                         
                         # Add latitude and longitude columns
                         geocoded_data['latitude'] = np.random.uniform(25, 50, len(geocoded_data))
