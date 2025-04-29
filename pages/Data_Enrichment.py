@@ -979,6 +979,18 @@ else:
                             # Prepare mapping data
                             map_data = df.copy()
                             
+                            # Validate value column is numeric
+                            if not pd.api.types.is_numeric_dtype(map_data[value_column]):
+                                # Try to convert to numeric, coerce errors to NaN
+                                map_data[value_column] = pd.to_numeric(map_data[value_column], errors='coerce')
+                                # Drop rows with NaN values after conversion
+                                map_data = map_data.dropna(subset=[value_column])
+                                
+                                if len(map_data) == 0:
+                                    raise ValueError(f"Could not convert '{value_column}' to numeric values. Please select a numeric column.")
+                                
+                                st.info(f"Converted '{value_column}' to numeric data. Some non-numeric values were removed.")
+                            
                             # Derive ISO codes for countries if not present
                             if region_level == "Country":
                                 # Check if the column already contains ISO codes
