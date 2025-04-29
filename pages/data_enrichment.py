@@ -518,12 +518,12 @@ else:
             col1, col2 = st.columns(2)
             
             with col1:
-                if st.button("Apply Changes to Dataset"):
+                if st.button("Apply Changes to Dataset", key="apply_enriched_data_1"):
                     st.session_state.cleaned_data = st.session_state.enriched_data
                     st.success("Enriched data has been applied as the current dataset")
             
             with col2:
-                if st.button("Discard Changes"):
+                if st.button("Discard Changes", key="discard_enriched_data_1"):
                     st.session_state.enriched_data = None
                     st.info("Enriched data has been discarded")
         
@@ -2820,12 +2820,12 @@ else:
             col1, col2 = st.columns(2)
             
             with col1:
-                if st.button("Apply Changes to Dataset"):
+                if st.button("Apply Changes to Dataset", key="apply_enriched_data_2"):
                     st.session_state.cleaned_data = st.session_state.enriched_data
                     st.success("Enriched data has been applied as the current dataset")
             
             with col2:
-                if st.button("Discard Changes"):
+                if st.button("Discard Changes", key="discard_enriched_data_2"):
                     st.session_state.enriched_data = None
                     st.info("Enriched data has been discarded")
         
