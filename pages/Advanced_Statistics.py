@@ -1503,9 +1503,23 @@ with tab3:
                                     """)
                                 
                                 elif distribution == "Bernoulli (for binary data)":
+                                    # Get parameter mean
                                     p_mean = summary.loc["p", "mean"]
-                                    p_hdi_low = summary.loc["p", "hdi_2.5%"]
-                                    p_hdi_high = summary.loc["p", "hdi_97.5%"]
+                                    
+                                    # Handle different HDI column naming formats
+                                    if 'hdi_2.5%' in summary.columns:
+                                        p_hdi_low = summary.loc["p", "hdi_2.5%"]
+                                        p_hdi_high = summary.loc["p", "hdi_97.5%"]
+                                    elif 'hdi 2.5%' in summary.columns:
+                                        p_hdi_low = summary.loc["p", "hdi 2.5%"]
+                                        p_hdi_high = summary.loc["p", "hdi 97.5%"]
+                                    elif '2.5%' in summary.columns:
+                                        p_hdi_low = summary.loc["p", "2.5%"]
+                                        p_hdi_high = summary.loc["p", "97.5%"]
+                                    else:
+                                        # Fallback if HDI columns aren't found
+                                        p_hdi_low = max(0.0, p_mean - 2 * summary.loc["p", "sd"])
+                                        p_hdi_high = min(1.0, p_mean + 2 * summary.loc["p", "sd"])
                                     
                                     st.markdown(f"""
                                     Based on the Bayesian analysis:
