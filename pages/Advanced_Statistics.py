@@ -1312,13 +1312,23 @@ with tab3:
                                 st.markdown("#### Bayesian Estimation Results")
                                 
                                 # Create a nicer summary table
+                                # Create a results dataframe with appropriate columns
                                 result_df = pd.DataFrame({
                                     'Parameter': param_names,
                                     'Mean': summary['mean'].values,
-                                    'Std Dev': summary['sd'].values,
-                                    '2.5%': summary['hdi_2.5%'].values,
-                                    '97.5%': summary['hdi_97.5%'].values
+                                    'Std Dev': summary['sd'].values
                                 })
+                                
+                                # Add HDI intervals if available
+                                if 'hdi_2.5%' in summary.columns:
+                                    result_df['2.5%'] = summary['hdi_2.5%'].values
+                                    result_df['97.5%'] = summary['hdi_97.5%'].values
+                                elif 'hdi 2.5%' in summary.columns:
+                                    result_df['2.5%'] = summary['hdi 2.5%'].values
+                                    result_df['97.5%'] = summary['hdi 97.5%'].values
+                                elif '2.5%' in summary.columns:
+                                    result_df['2.5%'] = summary['2.5%'].values
+                                    result_df['97.5%'] = summary['97.5%'].values
                                 
                                 st.dataframe(result_df.round(4), use_container_width=True)
                                 
@@ -1398,13 +1408,32 @@ with tab3:
                                 st.markdown("#### Interpretation")
                                 
                                 if distribution == "Normal (Gaussian)":
+                                    # Get parameter means
                                     mu_mean = summary.loc["mu", "mean"]
-                                    mu_hdi_low = summary.loc["mu", "hdi_2.5%"]
-                                    mu_hdi_high = summary.loc["mu", "hdi_97.5%"]
-                                    
                                     sigma_mean = summary.loc["sigma", "mean"]
-                                    sigma_hdi_low = summary.loc["sigma", "hdi_2.5%"]
-                                    sigma_hdi_high = summary.loc["sigma", "hdi_97.5%"]
+                                    
+                                    # Handle different HDI column naming formats
+                                    if 'hdi_2.5%' in summary.columns:
+                                        mu_hdi_low = summary.loc["mu", "hdi_2.5%"]
+                                        mu_hdi_high = summary.loc["mu", "hdi_97.5%"]
+                                        sigma_hdi_low = summary.loc["sigma", "hdi_2.5%"]
+                                        sigma_hdi_high = summary.loc["sigma", "hdi_97.5%"]
+                                    elif 'hdi 2.5%' in summary.columns:
+                                        mu_hdi_low = summary.loc["mu", "hdi 2.5%"]
+                                        mu_hdi_high = summary.loc["mu", "hdi 97.5%"]
+                                        sigma_hdi_low = summary.loc["sigma", "hdi 2.5%"]
+                                        sigma_hdi_high = summary.loc["sigma", "hdi 97.5%"]
+                                    elif '2.5%' in summary.columns:
+                                        mu_hdi_low = summary.loc["mu", "2.5%"]
+                                        mu_hdi_high = summary.loc["mu", "97.5%"]
+                                        sigma_hdi_low = summary.loc["sigma", "2.5%"]
+                                        sigma_hdi_high = summary.loc["sigma", "97.5%"]
+                                    else:
+                                        # Fallback if HDI columns aren't found
+                                        mu_hdi_low = mu_mean - 2 * summary.loc["mu", "sd"]
+                                        mu_hdi_high = mu_mean + 2 * summary.loc["mu", "sd"]
+                                        sigma_hdi_low = sigma_mean - 2 * summary.loc["sigma", "sd"]
+                                        sigma_hdi_high = sigma_mean + 2 * summary.loc["sigma", "sd"]
                                     
                                     st.markdown(f"""
                                     Based on the Bayesian analysis:
@@ -1416,9 +1445,23 @@ with tab3:
                                     """)
                                 
                                 elif distribution == "Exponential":
+                                    # Get parameter mean
                                     lambda_mean = summary.loc["lambda", "mean"]
-                                    lambda_hdi_low = summary.loc["lambda", "hdi_2.5%"]
-                                    lambda_hdi_high = summary.loc["lambda", "hdi_97.5%"]
+                                    
+                                    # Handle different HDI column naming formats
+                                    if 'hdi_2.5%' in summary.columns:
+                                        lambda_hdi_low = summary.loc["lambda", "hdi_2.5%"]
+                                        lambda_hdi_high = summary.loc["lambda", "hdi_97.5%"]
+                                    elif 'hdi 2.5%' in summary.columns:
+                                        lambda_hdi_low = summary.loc["lambda", "hdi 2.5%"]
+                                        lambda_hdi_high = summary.loc["lambda", "hdi 97.5%"]
+                                    elif '2.5%' in summary.columns:
+                                        lambda_hdi_low = summary.loc["lambda", "2.5%"]
+                                        lambda_hdi_high = summary.loc["lambda", "97.5%"]
+                                    else:
+                                        # Fallback if HDI columns aren't found
+                                        lambda_hdi_low = lambda_mean - 2 * summary.loc["lambda", "sd"]
+                                        lambda_hdi_high = lambda_mean + 2 * summary.loc["lambda", "sd"]
                                     
                                     mean_value = 1 / lambda_mean
                                     
@@ -1432,9 +1475,23 @@ with tab3:
                                     """)
                                 
                                 elif distribution == "Poisson":
+                                    # Get parameter mean
                                     lambda_mean = summary.loc["lambda", "mean"]
-                                    lambda_hdi_low = summary.loc["lambda", "hdi_2.5%"]
-                                    lambda_hdi_high = summary.loc["lambda", "hdi_97.5%"]
+                                    
+                                    # Handle different HDI column naming formats
+                                    if 'hdi_2.5%' in summary.columns:
+                                        lambda_hdi_low = summary.loc["lambda", "hdi_2.5%"]
+                                        lambda_hdi_high = summary.loc["lambda", "hdi_97.5%"]
+                                    elif 'hdi 2.5%' in summary.columns:
+                                        lambda_hdi_low = summary.loc["lambda", "hdi 2.5%"]
+                                        lambda_hdi_high = summary.loc["lambda", "hdi 97.5%"]
+                                    elif '2.5%' in summary.columns:
+                                        lambda_hdi_low = summary.loc["lambda", "2.5%"]
+                                        lambda_hdi_high = summary.loc["lambda", "97.5%"]
+                                    else:
+                                        # Fallback if HDI columns aren't found
+                                        lambda_hdi_low = lambda_mean - 2 * summary.loc["lambda", "sd"]
+                                        lambda_hdi_high = lambda_mean + 2 * summary.loc["lambda", "sd"]
                                     
                                     st.markdown(f"""
                                     Based on the Bayesian analysis:
@@ -1649,13 +1706,23 @@ with tab3:
                                             st.markdown(f"Std Dev: {group_b_data.std():.4f}")
                                         
                                         # Create a summary table
+                                        # Create a results dataframe with appropriate columns
                                         result_df = pd.DataFrame({
                                             'Parameter': ["Group A Mean", "Group B Mean", "Difference (B - A)", "Percent Difference"],
                                             'Mean': summary['mean'].values,
-                                            'Std Dev': summary['sd'].values,
-                                            '2.5%': summary['hdi_2.5%'].values,
-                                            '97.5%': summary['hdi_97.5%'].values
+                                            'Std Dev': summary['sd'].values
                                         })
+                                        
+                                        # Add HDI intervals if available
+                                        if 'hdi_2.5%' in summary.columns:
+                                            result_df['2.5%'] = summary['hdi_2.5%'].values
+                                            result_df['97.5%'] = summary['hdi_97.5%'].values
+                                        elif 'hdi 2.5%' in summary.columns:
+                                            result_df['2.5%'] = summary['hdi 2.5%'].values
+                                            result_df['97.5%'] = summary['hdi 97.5%'].values
+                                        elif '2.5%' in summary.columns:
+                                            result_df['2.5%'] = summary['2.5%'].values
+                                            result_df['97.5%'] = summary['97.5%'].values
                                         
                                         st.dataframe(result_df.round(4), use_container_width=True)
                                         
@@ -1748,11 +1815,24 @@ with tab3:
                                         # Interpret results
                                         st.markdown("#### Interpretation")
                                         
+                                        # Get the mean for diff and percent_diff
                                         diff_mean = summary.loc["diff", "mean"]
-                                        diff_hdi_low = summary.loc["diff", "hdi_2.5%"]
-                                        diff_hdi_high = summary.loc["diff", "hdi_97.5%"]
-                                        
                                         percent_diff_mean = summary.loc["percent_diff", "mean"]
+                                        
+                                        # Handle different HDI column naming formats
+                                        if 'hdi_2.5%' in summary.columns:
+                                            diff_hdi_low = summary.loc["diff", "hdi_2.5%"]
+                                            diff_hdi_high = summary.loc["diff", "hdi_97.5%"]
+                                        elif 'hdi 2.5%' in summary.columns:
+                                            diff_hdi_low = summary.loc["diff", "hdi 2.5%"]
+                                            diff_hdi_high = summary.loc["diff", "hdi 97.5%"]
+                                        elif '2.5%' in summary.columns:
+                                            diff_hdi_low = summary.loc["diff", "2.5%"]
+                                            diff_hdi_high = summary.loc["diff", "97.5%"]
+                                        else:
+                                            # Fallback if HDI columns aren't found
+                                            diff_hdi_low = diff_mean - 2 * summary.loc["diff", "sd"]
+                                            diff_hdi_high = diff_mean + 2 * summary.loc["diff", "sd"]
                                         
                                         if diff_hdi_low > 0:
                                             # B is definitely better
