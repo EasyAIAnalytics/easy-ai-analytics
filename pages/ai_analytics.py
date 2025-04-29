@@ -113,6 +113,13 @@ with tab1:
             progress_bar.progress(10)
             
             try:
+                # Ensure data types are correct
+                st.session_state.cleaned_data[value_column] = pd.to_numeric(st.session_state.cleaned_data[value_column], errors='coerce')
+                st.session_state.cleaned_data = st.session_state.cleaned_data.dropna(subset=[value_column])
+                
+                if len(st.session_state.cleaned_data) < 10:
+                    raise ValueError("Insufficient data points for forecasting (minimum 10 required)")
+                
                 # Select forecast method
                 method = "prophet" if forecast_method == "Prophet (recommended)" else "exponential_smoothing"
                 
