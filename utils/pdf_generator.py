@@ -30,10 +30,12 @@ class PDFGenerator:
         """
         self.form_data = form_data
         self.data = data
-        self.insights = insights
+        self.insights = insights if insights else []
         self.missing_fig = missing_fig
         self.numeric_fig = numeric_fig
         self.categorical_fig = categorical_fig
+        # Initialize temp_images as instance variable to avoid scoping issues
+        self.temp_images = []
         
     def _save_figure_as_image(self, fig):
         """
@@ -75,11 +77,34 @@ class PDFGenerator:
         # Create a list to store content
         content = []
         
-        # Add logo
-        logo_path = 'assets/logo.svg'
-        if os.path.exists(logo_path):
-            content.append(Image(logo_path, width=2*inch, height=2*inch))
-            content.append(Spacer(1, 0.1*inch))
+        # Add logo - using PNG instead of SVG for better compatibility
+        try:
+            # Try with SVG first
+            logo_path = 'assets/logo.svg'
+            if os.path.exists(logo_path):
+                # Convert SVG to PNG using reportlab's rendering
+                from reportlab.graphics import renderPM
+                from svglib.svglib import svg2rlg
+                
+                # Create a temporary PNG file
+                with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as temp:
+                    temp_png = temp.name
+                    try:
+                        drawing = svg2rlg(logo_path)
+                        renderPM.drawToFile(drawing, temp_png, fmt='PNG')
+                        content.append(Image(temp_png, width=2*inch, height=2*inch))
+                        temp_images.append(temp_png)  # Add to temp files for cleanup
+                    except:
+                        # If SVG conversion fails, add a text header instead
+                        content.append(Paragraph("Easy AI Analytics", styles['Title']))
+            else:
+                # If no logo file, add a text header
+                content.append(Paragraph("Easy AI Analytics", styles['Title']))
+        except:
+            # Fallback to text if any error occurs
+            content.append(Paragraph("Easy AI Analytics", styles['Title']))
+            
+        content.append(Spacer(1, 0.1*inch))
         
         # Add title
         title_style = styles['Title']
@@ -113,18 +138,22 @@ class PDFGenerator:
         content.append(Paragraph(self.form_data.get('timeframe', 'N/A'), styles['Normal']))
         content.append(Spacer(1, 0.2*inch))
         
-        # Add dataset overview
+        # Add dataset overview with error handling
         content.append(Paragraph("Dataset Overview", section_style))
-        content.append(Paragraph(f"Rows: {self.data.shape[0]}", styles['Normal']))
-        content.append(Paragraph(f"Columns: {self.data.shape[1]}", styles['Normal']))
-        content.append(Paragraph(f"Missing Values: {self.data.isna().sum().sum()}", styles['Normal']))
+        if self.data is not None and not self.data.empty:
+            content.append(Paragraph(f"Rows: {self.data.shape[0]}", styles['Normal']))
+            content.append(Paragraph(f"Columns: {self.data.shape[1]}", styles['Normal']))
+            content.append(Paragraph(f"Missing Values: {self.data.isna().sum().sum()}", styles['Normal']))
+        else:
+            content.append(Paragraph("No data available for analysis", styles['Normal']))
         content.append(Spacer(1, 0.2*inch))
         
         # Add visualizations if available
         if any([self.missing_fig, self.numeric_fig, self.categorical_fig]):
             content.append(Paragraph("Data Visualizations", section_style))
             
-            # Save figures as temporary images
+            # Initialize temp_images list if it doesn't exist
+        if not 'temp_images' in locals():
             temp_images = []
             
             if self.missing_fig:
@@ -171,12 +200,28 @@ class PDFGenerator:
         # Add sample data table
         content.append(Paragraph("Data Sample", section_style))
         
-        # Create the table data including headers
-        table_data = [self.data.columns.tolist()]
-        
-        # Add up to 5 rows of data
-        for i in range(min(5, len(self.data))):
-            table_data.append([str(cell) for cell in self.data.iloc[i].values])
+        # Create the table data including headers - handling potential None or empty DataFrame
+        if self.data is not None and not self.data.empty:
+            # Convert any problematic columns to string type (especially datetime columns)
+            safe_data = self.data.copy()
+            for col in safe_data.columns:
+                if pd.api.types.is_datetime64_any_dtype(safe_data[col]):
+                    safe_data[col] = safe_data[col].dt.strftime('%Y-%m-%d %H:%M:%S')
+            
+            table_data = [safe_data.columns.tolist()]
+            
+            # Add up to 5 rows of data
+            for i in range(min(5, len(safe_data))):
+                row_data = []
+                for cell in safe_data.iloc[i].values:
+                    if isinstance(cell, (pd.Timestamp, np.datetime64)):
+                        row_data.append(str(pd.Timestamp(cell).strftime('%Y-%m-%d %H:%M:%S')))
+                    else:
+                        row_data.append(str(cell))
+                table_data.append(row_data)
+        else:
+            # If no data is available, create a simple table with a message
+            table_data = [["No Data Available"]]
         
         # Create the table
         table = Table(table_data)
@@ -195,16 +240,29 @@ class PDFGenerator:
         
         content.append(table)
         
+        # Define temp_images as an empty list if not already defined
+        if not 'temp_images' in locals():
+            temp_images = []
+            
         # Build the PDF document
-        doc.build(content)
-        
+        try:
+            doc.build(content)
+        except Exception as e:
+            # If document building fails, create a simple error document
+            buffer = io.BytesIO()
+            simple_doc = SimpleDocTemplate(buffer, pagesize=letter)
+            error_content = []
+            error_content.append(Paragraph("Error Generating Report", styles['Title']))
+            error_content.append(Spacer(1, 0.25*inch))
+            error_content.append(Paragraph(f"An error occurred: {str(e)}", styles['Normal']))
+            simple_doc.build(error_content)
+            
         # Clean up temporary image files
-        if 'temp_images' in locals():
-            for img_path in temp_images:
-                try:
-                    os.unlink(img_path)
-                except:
-                    pass
+        for img_path in temp_images:
+            try:
+                os.unlink(img_path)
+            except:
+                pass
         
         # Get the value of the buffer and return it
         buffer.seek(0)

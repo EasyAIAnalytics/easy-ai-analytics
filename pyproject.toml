@@ -21,4 +21,5 @@ dependencies = [
     "streamlit-javascript>=0.1.5",
     "streamlit>=1.44.1",
     "trafilatura>=2.0.0",
+    "svglib>=1.5.1",
 ]
