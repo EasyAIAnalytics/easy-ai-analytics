@@ -22,4 +22,8 @@ dependencies = [
     "streamlit>=1.44.1",
     "trafilatura>=2.0.0",
     "svglib>=1.5.1",
+    "python-docx>=1.1.2",
+    "docxcompose>=1.4.0",
+    "matplotlib>=3.10.1",
+    "docxtpl>=0.19.1",
 ]

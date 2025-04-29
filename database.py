@@ -33,6 +33,8 @@ saved_reports = Table(
     Column('company_name', String(255)),
     Column('description', Text),
     Column('pdf_data', LargeBinary, nullable=False),
+    Column('docx_data', LargeBinary),  # DOCX report data (optional)
+    Column('report_format', String(10), default='pdf'),  # Format of the report: 'pdf' or 'docx'
     Column('created_at', TIMESTAMP, nullable=False, server_default=text('CURRENT_TIMESTAMP'))
 )
 
@@ -136,26 +138,34 @@ def get_dataset(dataset_id):
             return pd.read_csv(io.BytesIO(csv_data))
         return None
 
-def save_report(title, company_name, description, pdf_data):
+def save_report(title, company_name, description, pdf_data, docx_data=None, report_format='pdf'):
     """
-    Save generated PDF report to database
+    Save generated report to database in PDF and/or DOCX format
     
     Args:
         title (str): Title of the report
         company_name (str): Company name
         description (str): Description of the report
         pdf_data (bytes): PDF file data
+        docx_data (bytes, optional): DOCX file data
+        report_format (str, optional): Format of the report ('pdf', 'docx', or 'both')
         
     Returns:
         int: ID of the saved report
     """
     with engine.connect() as connection:
-        stmt = insert(saved_reports).values(
-            title=title,
-            company_name=company_name,
-            description=description,
-            pdf_data=pdf_data
-        ).returning(saved_reports.c.id)
+        values = {
+            'title': title,
+            'company_name': company_name,
+            'description': description,
+            'pdf_data': pdf_data,
+            'report_format': report_format
+        }
+        
+        if docx_data:
+            values['docx_data'] = docx_data
+            
+        stmt = insert(saved_reports).values(**values).returning(saved_reports.c.id)
         
         result = connection.execute(stmt)
         connection.commit()
@@ -179,23 +189,29 @@ def get_all_reports():
         result = connection.execute(stmt)
         return result.fetchall()
 
-def get_report(report_id):
+def get_report(report_id, format='pdf'):
     """
     Get report by ID
     
     Args:
         report_id (int): ID of the report
+        format (str, optional): Format to retrieve ('pdf' or 'docx')
         
     Returns:
-        bytes: PDF data
+        bytes: Report data in requested format
     """
     with engine.connect() as connection:
-        stmt = select(saved_reports.c.pdf_data).where(saved_reports.c.id == report_id)
+        if format == 'docx':
+            stmt = select(saved_reports.c.docx_data).where(saved_reports.c.id == report_id)
+        else:  # Default to PDF
+            stmt = select(saved_reports.c.pdf_data).where(saved_reports.c.id == report_id)
+        
         result = connection.execute(stmt)
         report = result.fetchone()
         
         if report:
-            return report.pdf_data
+            # Return the first column (either pdf_data or docx_data)
+            return report[0]
         return None
 
 def save_insights(dataset_id, insights_list):

@@ -354,6 +354,34 @@ wheels = [
 ]
 
 [[package]]
+name = "docxcompose"
+version = "1.4.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "babel" },
+    { name = "lxml" },
+    { name = "python-docx" },
+    { name = "setuptools" },
+    { name = "six" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/5d/25/07597a0fda04adf2f2fc375f48f704612a91c0c1da64f4c18e78a4a26630/docxcompose-1.4.0.tar.gz", hash = "sha256:bcf2799a0b63c29eb77a3d799a2f28443ae0f69f8691ff3d753f706be515c3e9", size = 20219 }
+
+[[package]]
+name = "docxtpl"
+version = "0.19.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "docxcompose" },
+    { name = "jinja2" },
+    { name = "lxml" },
+    { name = "python-docx" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/89/fe/8a71f561cc07ec01aad2a2a961828dfe6ca28994b1c9f3997c04d9da4b26/docxtpl-0.19.1.tar.gz", hash = "sha256:5836aab5583a82e2e81b086fae130ce94dc080f6b7fe0e43f83f4e3e3e5daecf", size = 31156 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7c/db/18fadca96a1895a25afaec1d4a373a0f1a9087fe088363719ba590d14c95/docxtpl-0.19.1-py2.py3-none-any.whl", hash = "sha256:12dbf93069d3d08897e3a44a4a043cb60d0320b88228ec2a6c6cf0e103c732dd", size = 29508 },
+]
+
+[[package]]
 name = "etuples"
 version = "0.3.9"
 source = { registry = "https://pypi.org/simple" }
@@ -1499,6 +1527,19 @@ wheels = [
 ]
 
 [[package]]
+name = "python-docx"
+version = "1.1.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "lxml" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/35/e4/386c514c53684772885009c12b67a7edd526c15157778ac1b138bc75063e/python_docx-1.1.2.tar.gz", hash = "sha256:0cf1f22e95b9002addca7948e16f2cd7acdfd498047f1941ca5d293db7762efd", size = 5656581 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3e/3d/330d9efbdb816d3f60bf2ad92f05e1708e4a1b9abe80461ac3444c83f749/python_docx-1.1.2-py3-none-any.whl", hash = "sha256:08c20d6058916fb19853fcf080f7f42b6270d89eac9fa5f8c15f691c0017fabe", size = 244315 },
+]
+
+[[package]]
 name = "pytz"
 version = "2025.2"
 source = { registry = "https://pypi.org/simple" }
@@ -1581,6 +1622,9 @@ source = { virtual = "." }
 dependencies = [
     { name = "anthropic" },
     { name = "arviz" },
+    { name = "docxcompose" },
+    { name = "docxtpl" },
+    { name = "matplotlib" },
     { name = "numpy" },
     { name = "openai" },
     { name = "pandas" },
@@ -1588,6 +1632,7 @@ dependencies = [
     { name = "prophet" },
     { name = "psycopg2-binary" },
     { name = "pymc" },
+    { name = "python-docx" },
     { name = "reportlab" },
     { name = "scikit-learn" },
     { name = "scipy" },
@@ -1603,6 +1648,9 @@ dependencies = [
 requires-dist = [
     { name = "anthropic", specifier = ">=0.50.0" },
     { name = "arviz", specifier = ">=0.21.0" },
+    { name = "docxcompose", specifier = ">=1.4.0" },
+    { name = "docxtpl", specifier = ">=0.19.1" },
+    { name = "matplotlib", specifier = ">=3.10.1" },
     { name = "numpy", specifier = ">=2.2.5" },
     { name = "openai", specifier = ">=1.76.0" },
     { name = "pandas", specifier = ">=2.2.3" },
@@ -1610,6 +1658,7 @@ requires-dist = [
     { name = "prophet", specifier = ">=1.1.6" },
     { name = "psycopg2-binary", specifier = ">=2.9.10" },
     { name = "pymc", specifier = ">=5.22.0" },
+    { name = "python-docx", specifier = ">=1.1.2" },
     { name = "reportlab", specifier = ">=4.4.0" },
     { name = "scikit-learn", specifier = ">=1.6.1" },
     { name = "scipy", specifier = ">=1.15.2" },
