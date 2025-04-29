@@ -54,6 +54,11 @@ with tab1:
     This helps anticipate future performance and make proactive decisions.
     """)
     
+    # Check if data is available
+    if st.session_state.cleaned_data is None:
+        st.warning("Please upload data in the main dashboard before using this feature.")
+        st.stop()
+        
     # Check for date columns
     date_columns = []
     for col in st.session_state.cleaned_data.columns:

@@ -1221,6 +1221,11 @@ else:
             st.markdown("#### Add Calculated Columns")
             st.markdown("Create new columns based on calculations or transformations of existing columns.")
             
+            # Check if data is available
+            if st.session_state.cleaned_data is None:
+                st.warning("Please upload data in the main dashboard before using this feature.")
+                st.stop()
+                
             # Get existing columns
             columns = st.session_state.cleaned_data.columns.tolist()
             numeric_columns = st.session_state.cleaned_data.select_dtypes(include=['int64', 'float64']).columns.tolist()

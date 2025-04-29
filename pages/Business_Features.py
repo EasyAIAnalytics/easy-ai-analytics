@@ -57,6 +57,10 @@ with tab1:
     st.markdown("#### Configure KPIs")
     
     # Get numeric columns for KPIs
+    if st.session_state.cleaned_data is None:
+        st.warning("Please upload data in the main dashboard before using this feature.")
+        st.stop()
+    
     numeric_columns = st.session_state.cleaned_data.select_dtypes(include=['int64', 'float64']).columns.tolist()
     date_columns = []
     
