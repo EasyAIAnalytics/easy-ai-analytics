@@ -84,24 +84,22 @@ class DocxGenerator:
             shading_elm.set(qn('w:fill'), 'F2F2F2')  # Light gray background
             paragraph._element.get_or_add_pPr().append(shading_elm)
         else:
-            # Standard LaTeX formula handling
+            # Simpler approach for math formulas - just display as formatted text
+            # instead of using Office Math Markup Language which can cause XML issues
             paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            
-            # Create the element for the equation
-            element = OxmlElement('m:oMathPara')
-            element.set(qn('xmlns:m'), 'http://schemas.openxmlformats.org/officeDocument/2006/math')
-            
-            # Create the OMML element for the formula
-            omml = OxmlElement('m:oMath')
-            element.append(omml)
-            
-            # Set up the run for the formula text
-            run = paragraph.add_run()
-            run._element.append(element)
-            
-            # Add the formula text to the equation element
+            run = paragraph.add_run(formula_text)
             run.font.italic = True
-            run.text = formula_text
+            run.font.name = 'Cambria Math'
+            run.font.size = Pt(12)
+            run.font.bold = False
+            
+            # Add a note that this is a mathematical formula
+            note_run = paragraph.add_run()
+            note_run.add_break()
+            note_run.add_text("(Mathematical Formula)")
+            note_run.font.size = Pt(8)
+            note_run.font.italic = True
+            note_run.font.color.rgb = RGBColor(100, 100, 100)
         
         return paragraph
         
