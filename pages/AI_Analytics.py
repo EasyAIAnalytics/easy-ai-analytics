@@ -30,6 +30,10 @@ ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
 if not OPENAI_API_KEY and not ANTHROPIC_API_KEY:
     st.warning("AI features require either an OpenAI or Anthropic API key. Please provide one in the settings to enable these features.")
+elif OPENAI_API_KEY:
+    st.info("OpenAI API is configured. Note that API usage is subject to rate limits and quotas. If you encounter quota errors, you may need to check your OpenAI account billing status.")
+elif ANTHROPIC_API_KEY:
+    st.info("Anthropic API is configured. Note that API usage is subject to rate limits and quotas.")
 
 # Initialize session state variables if they don't exist
 if 'data' not in st.session_state or st.session_state.data is None:
@@ -373,9 +377,11 @@ with tab2:
     # Check if API keys are available
     if not OPENAI_API_KEY and not ANTHROPIC_API_KEY:
         st.warning("AI-generated insights require either an OpenAI or Anthropic API key. Please provide one in the settings.")
-        st.info(f"DEBUG - OPENAI_API_KEY available: {'Yes' if OPENAI_API_KEY else 'No'}")
-        st.info(f"DEBUG - ANTHROPIC_API_KEY available: {'Yes' if ANTHROPIC_API_KEY else 'No'}")
     else:
+        if OPENAI_API_KEY:
+            st.info("ℹ️ Using OpenAI API for generating insights. Note that API usage consumes tokens and is subject to rate limits and quotas. If you encounter quota errors, please check your OpenAI account billing page.")
+        elif ANTHROPIC_API_KEY:
+            st.info("ℹ️ Using Anthropic API for generating insights. Note that API usage consumes tokens and is subject to rate limits and quotas.")
         # AI insight generation options
         st.markdown("#### Configure AI Insight Generation")
         
@@ -439,9 +445,8 @@ with tab2:
             progress_bar.progress(30)
             
             try:
-                # Debug the OpenAI API key availability 
-                st.session_state['openai_key_debug'] = "Available" if OPENAI_API_KEY else "Not available"
-                st.session_state['anthropic_key_debug'] = "Available" if ANTHROPIC_API_KEY else "Not available"
+                # Check that the AI clients are ready
+                # No debugging information needed here
                 
                 # Prepare data for analysis
                 if selected_columns:

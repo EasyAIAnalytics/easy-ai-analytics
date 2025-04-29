@@ -351,11 +351,17 @@ class AIAnalytics:
             
             # Check for common OpenAI API errors
             if "insufficient_quota" in error_message or "quota" in error_message:
-                return [f"Error generating AI insights: OpenAI API quota exceeded. Please check your API key billing and quota limits."]
+                return [f"Error generating AI insights: OpenAI API quota exceeded. Please check your API key billing status and quota limits. You may need to add payment information to your OpenAI account or upgrade your plan."]
             elif "rate limit" in error_message.lower() or "rate_limit" in error_message.lower():
-                return [f"Error generating AI insights: OpenAI API rate limit reached. Please try again in a few minutes."]
+                return [f"Error generating AI insights: API rate limit reached. Please try again in a few minutes, or reduce the frequency of requests."]
+            elif "authentication" in error_message.lower() or "auth" in error_message.lower() or "key" in error_message.lower():
+                return [f"Error generating AI insights: Authentication error with the API. Please check if your API key is valid and properly configured."]
+            elif "context_length_exceeded" in error_message or "maximum context length" in error_message.lower():
+                return [f"Error generating AI insights: The dataset is too large for the AI model's context window. Try analyzing fewer columns or a smaller dataset."]
+            elif "connection" in error_message.lower() or "timeout" in error_message.lower():
+                return [f"Error generating AI insights: Connection error when calling the AI service. Please check your internet connection and try again."]
             else:
-                return [f"Error generating AI insights: {error_message}"]
+                return [f"Error generating AI insights: {error_message}. Please try again or contact support if the issue persists."]
     
     def analyze_sentiment(self, text_column):
         """
@@ -455,13 +461,19 @@ class AIAnalytics:
             except Exception as e:
                 error_message = str(e)
                 
-                # Check for common OpenAI API errors
+                # Check for common API errors
                 if "insufficient_quota" in error_message or "quota" in error_message:
-                    error_detail = "OpenAI API quota exceeded. Please check your API key billing and quota limits."
+                    error_detail = "API quota exceeded. Please check your API key billing status and quota limits. You may need to add payment information to your account or upgrade your plan."
                 elif "rate limit" in error_message.lower() or "rate_limit" in error_message.lower():
-                    error_detail = "OpenAI API rate limit reached. Please try again in a few minutes."
+                    error_detail = "API rate limit reached. Please try again in a few minutes, or reduce the frequency of requests."
+                elif "authentication" in error_message.lower() or "auth" in error_message.lower() or "key" in error_message.lower():
+                    error_detail = "Authentication error with the API. Please check if your API key is valid and properly configured."
+                elif "context_length_exceeded" in error_message or "maximum context length" in error_message.lower():
+                    error_detail = "The text is too large for the AI model's context window. Try analyzing shorter text."
+                elif "connection" in error_message.lower() or "timeout" in error_message.lower():
+                    error_detail = "Connection error when calling the AI service. Please check your internet connection and try again."
                 else:
-                    error_detail = error_message
+                    error_detail = f"{error_message}. Please try again or contact support if the issue persists."
                     
                 results.append({
                     "text": text[:100] + "..." if len(text) > 100 else text,
