@@ -218,8 +218,9 @@ with tab1:
                     st.markdown("#### Forecast Insights")
                     
                     # Calculate forecast statistics
-                    last_historical_value = historical_values[-1]
-                    last_forecast_value = forecast_values[-1]
+                    # Ensure values are numeric before calculations
+                    last_historical_value = float(historical_values[-1])
+                    last_forecast_value = float(forecast_values[-1])
                     forecast_change = last_forecast_value - last_historical_value
                     forecast_pct_change = (forecast_change / last_historical_value) * 100 if last_historical_value != 0 else 0
                     
@@ -243,12 +244,21 @@ with tab1:
                     with col3:
                         # Calculate average growth rate
                         if len(forecast_values) > 1:
-                            growth_rate = (forecast_values[-1] / forecast_values[0]) ** (1 / len(forecast_values)) - 1
-                            growth_pct = growth_rate * 100
-                            st.metric(
-                                "Average Growth Rate",
-                                f"{growth_pct:+.2f}% per period"
-                            )
+                            # Ensure values are numeric before calculations
+                            first_value = float(forecast_values[0])
+                            last_value = float(forecast_values[-1])
+                            if first_value > 0:  # Avoid division by zero or negative values
+                                growth_rate = (last_value / first_value) ** (1 / len(forecast_values)) - 1
+                                growth_pct = growth_rate * 100
+                                st.metric(
+                                    "Average Growth Rate",
+                                    f"{growth_pct:+.2f}% per period"
+                                )
+                            else:
+                                st.metric(
+                                    "Average Growth Rate",
+                                    "N/A (invalid data)"
+                                )
                     
                     # Provide additional insights
                     st.markdown("#### Additional Analysis")
