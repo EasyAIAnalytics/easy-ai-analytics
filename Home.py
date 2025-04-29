@@ -36,6 +36,9 @@ if not os.path.exists('assets'):
 if "data" not in st.session_state:
     st.session_state.data = None
     
+if "cleaned_data" not in st.session_state:
+    st.session_state.cleaned_data = None
+    
 if "file_name" not in st.session_state:
     st.session_state.file_name = None
     
@@ -117,6 +120,7 @@ with tab1:
         if st.button("Load Sample Data"):
             sample_data = create_sample_data()
             st.session_state.data = sample_data
+            st.session_state.cleaned_data = sample_data  # Keep cleaned_data in sync
             st.session_state.file_name = "sample_sales_data.csv"
             st.success("Sample data loaded successfully!")
             
@@ -141,6 +145,7 @@ with tab1:
                 loaded_df = db.get_dataset(dataset_id)
                 if loaded_df is not None:
                     st.session_state.data = loaded_df
+                    st.session_state.cleaned_data = loaded_df  # Keep cleaned_data in sync
                     st.session_state.file_name = next((d[3] for d in datasets if d[0] == dataset_id), "unknown.csv")
                     st.success(f"Dataset '{selected_dataset.split(' (ID: ')[0]}' loaded successfully!")
                 else:
@@ -160,6 +165,7 @@ with tab1:
                 data = pd.read_excel(uploaded_file)
                 
             st.session_state.data = data
+            st.session_state.cleaned_data = data  # Keep cleaned_data in sync
             st.session_state.file_name = uploaded_file.name
             st.success(f"File '{uploaded_file.name}' uploaded successfully!")
         except Exception as e:
@@ -226,6 +232,7 @@ with tab1:
                 if st.button("Drop Missing Rows"):
                     cleaned_data = data_processor.drop_missing_rows()
                     st.session_state.data = cleaned_data
+                    st.session_state.cleaned_data = cleaned_data  # Keep cleaned_data in sync
                     st.success(f"Dropped rows with missing values. New shape: {cleaned_data.shape}")
                     st.rerun()
             
