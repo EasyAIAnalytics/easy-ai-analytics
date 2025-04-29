@@ -730,20 +730,21 @@ else:
         
         # Location columns detection
         location_columns = []
-        for col in df.columns:
-            col_lower = col.lower()
-            # Check for common location-related column names
-            if any(term in col_lower for term in ['country', 'city', 'state', 'region', 'province', 'address', 'location', 'postal', 'zip', 'county', 'latitude', 'longitude', 'lat', 'lon', 'lng']):
-                location_columns.append(col)
+        if df is not None:
+            for col in df.columns:
+                col_lower = col.lower()
+                # Check for common location-related column names
+                if any(term in col_lower for term in ['country', 'city', 'state', 'region', 'province', 'address', 'location', 'postal', 'zip', 'county', 'latitude', 'longitude', 'lat', 'lon', 'lng']):
+                    location_columns.append(col)
         
         if not location_columns:
             st.warning("No location-related columns detected in your data. Location columns typically include 'country', 'city', 'address', 'postal', 'latitude', 'longitude', etc.")
             
             # Manual column selection
-            all_columns = df.columns.tolist()
+            all_columns = df.columns.tolist() if df is not None else []
             location_column = st.selectbox(
                 "Select a Column Containing Location Information",
-                all_columns
+                all_columns if all_columns else ["No columns available"]
             )
             
             # Mapping type
