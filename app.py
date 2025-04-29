@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 from utils.data_processor import DataProcessor
 from utils.visualizer import Visualizer
 from utils.pdf_generator import PDFGenerator
+from utils.docx_generator import DocxGenerator
 import database as db
 
 # Page configuration
@@ -566,47 +567,104 @@ if st.session_state.data is not None:
             if submitted:
                 st.success("Form submitted successfully!")
         
-        # Generate PDF report
+        # Report generation section
         if st.session_state.form_data.get('company_name') and st.session_state.insights:
-            if st.button("Generate PDF Report"):
-                try:
-                    visualizer = Visualizer(st.session_state.cleaned_data)
-                    
-                    # Generate plots for the PDF
-                    missing_fig = visualizer.plot_missing_values()
-                    
-                    if numeric_columns:
-                        num_fig = visualizer.plot_numeric_distribution(numeric_columns[0])
-                    else:
-                        num_fig = None
+            # Create columns for report format selection
+            report_col1, report_col2 = st.columns(2)
+            
+            with report_col1:
+                # PDF report generation
+                if st.button("Generate PDF Report"):
+                    try:
+                        visualizer = Visualizer(st.session_state.cleaned_data)
                         
-                    if categorical_columns:
-                        cat_fig = visualizer.plot_categorical_distribution(categorical_columns[0])
-                    else:
-                        cat_fig = None
-                    
-                    # Generate PDF
-                    pdf_generator = PDFGenerator(
-                        st.session_state.form_data,
-                        st.session_state.cleaned_data,
-                        st.session_state.insights,
-                        missing_fig,
-                        num_fig,
-                        cat_fig
-                    )
-                    pdf_bytes = pdf_generator.generate_pdf()
-                    
-                    # Create download button
-                    st.download_button(
-                        label="Download PDF Report",
-                        data=pdf_bytes,
-                        file_name=f"{st.session_state.form_data['company_name']}_analytics_report.pdf",
-                        mime="application/pdf"
-                    )
-                except Exception as e:
-                    st.error(f"Error generating PDF: {e}")
+                        # Generate plots for the report
+                        missing_fig = visualizer.plot_missing_values()
+                        
+                        if numeric_columns:
+                            num_fig = visualizer.plot_numeric_distribution(numeric_columns[0])
+                        else:
+                            num_fig = None
+                            
+                        if categorical_columns:
+                            cat_fig = visualizer.plot_categorical_distribution(categorical_columns[0])
+                        else:
+                            cat_fig = None
+                        
+                        # Generate PDF
+                        pdf_generator = PDFGenerator(
+                            st.session_state.form_data,
+                            st.session_state.cleaned_data,
+                            st.session_state.insights,
+                            missing_fig,
+                            num_fig,
+                            cat_fig
+                        )
+                        pdf_bytes = pdf_generator.generate_pdf()
+                        
+                        # Create download button
+                        st.download_button(
+                            label="Download PDF Report",
+                            data=pdf_bytes,
+                            file_name=f"{st.session_state.form_data['company_name']}_analytics_report.pdf",
+                            mime="application/pdf"
+                        )
+                    except Exception as e:
+                        st.error(f"Error generating PDF: {e}")
+            
+            with report_col2:
+                # DOCX report generation with Excel formulas
+                if st.button("Generate DOCX Report (with Excel Formulas)"):
+                    try:
+                        visualizer = Visualizer(st.session_state.cleaned_data)
+                        
+                        # Generate plots for the report
+                        missing_fig = visualizer.plot_missing_values()
+                        
+                        if numeric_columns:
+                            num_fig = visualizer.plot_numeric_distribution(numeric_columns[0])
+                        else:
+                            num_fig = None
+                            
+                        if categorical_columns:
+                            cat_fig = visualizer.plot_categorical_distribution(categorical_columns[0])
+                        else:
+                            cat_fig = None
+                        
+                        # Generate DOCX
+                        docx_generator = DocxGenerator(
+                            st.session_state.form_data,
+                            st.session_state.cleaned_data,
+                            st.session_state.insights,
+                            missing_fig,
+                            num_fig,
+                            cat_fig
+                        )
+                        docx_bytes = docx_generator.generate_docx()
+                        
+                        # Create download button
+                        st.download_button(
+                            label="Download DOCX Report",
+                            data=docx_bytes,
+                            file_name=f"{st.session_state.form_data['company_name']}_analytics_report.docx",
+                            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                        )
+                        
+                        st.success("DOCX report contains Excel formula references including DAX, VLOOKUP, HLOOKUP, and XLOOKUP examples")
+                    except Exception as e:
+                        st.error(f"Error generating DOCX: {e}")
+            
+            # Add info about report features
+            st.info("""
+            **Report Features:**
+            - PDF Report: Standard report format with data visualizations and insights
+            - DOCX Report: Enhanced report with Excel formula examples including:
+              * DAX formulas for Power BI integration
+              * VLOOKUP, HLOOKUP, and XLOOKUP functions
+              * Advanced statistical formulas
+            """)
         else:
-            st.info("Please fill out the form and generate insights before creating a PDF report.")
+            st.info("Please fill out the form and generate insights before creating a report.")
 
 # What you get section
 if st.session_state.data is not None:
