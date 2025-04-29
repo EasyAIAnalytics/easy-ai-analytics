@@ -818,10 +818,24 @@ else:
                             # Prepare mapping data
                             map_data = df.copy()
                             
+                            # First, check if we have coordinate values before conversion
+                            if map_data[lat_column].isnull().all() or map_data[lon_column].isnull().all():
+                                raise ValueError(f"The selected columns '{lat_column}' and/or '{lon_column}' don't contain valid coordinate data. Please select different columns.")
+                            
+                            # Count original values before conversion
+                            original_count = len(map_data)
+                            
                             # Convert coordinates to numeric if not already
                             for col in [lat_column, lon_column]:
                                 if not pd.api.types.is_numeric_dtype(map_data[col]):
                                     map_data[col] = pd.to_numeric(map_data[col], errors='coerce')
+                            
+                            # Count values after numeric conversion
+                            after_conversion = len(map_data.dropna(subset=[lat_column, lon_column]))
+                            
+                            # Provide feedback if we lost a lot of data during conversion
+                            if after_conversion < original_count * 0.5:  # Lost more than 50%
+                                st.warning(f"Many values in '{lat_column}' and '{lon_column}' couldn't be converted to numeric coordinates. Please check if these are the right columns.")
                             
                             # Check if value column is selected and is numeric
                             if value_column != "None":
@@ -831,18 +845,27 @@ else:
                                     # Notify user
                                     st.info(f"Converted '{value_column}' to numeric data. Non-numeric values will be treated as missing.")
                             
-                            # Filter out invalid coordinates
+                            # Filter out invalid coordinates (now safer since we converted to numeric)
                             valid_coords = (map_data[lat_column].notna() & 
                                           map_data[lon_column].notna() &
-                                          (map_data[lat_column].astype(float) >= -90) &
-                                          (map_data[lat_column].astype(float) <= 90) &
-                                          (map_data[lon_column].astype(float) >= -180) &
-                                          (map_data[lon_column].astype(float) <= 180))
+                                          (map_data[lat_column] >= -90) &
+                                          (map_data[lat_column] <= 90) &
+                                          (map_data[lon_column] >= -180) &
+                                          (map_data[lon_column] <= 180))
                             
-                            map_data = map_data[valid_coords]
+                            # Apply filter and provide feedback
+                            valid_data = map_data[valid_coords]
                             
-                            if len(map_data) == 0:
-                                raise ValueError("No valid coordinates found in selected columns")
+                            if len(valid_data) == 0:
+                                if after_conversion > 0:
+                                    # We had numeric data but it was outside valid coordinate ranges
+                                    raise ValueError(f"Data in '{lat_column}' and '{lon_column}' doesn't contain valid coordinates. Valid latitude range is -90 to 90, longitude -180 to 180.")
+                                else:
+                                    # We couldn't convert any data to numeric
+                                    raise ValueError(f"Could not convert data in '{lat_column}' and '{lon_column}' to valid coordinates. Please select different columns.")
+                            
+                            # Update map_data with valid coordinates
+                            map_data = valid_data
                             
                             # Update progress
                             status_text.text("Creating map visualization...")
