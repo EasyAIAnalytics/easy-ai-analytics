@@ -26,4 +26,5 @@ dependencies = [
     "docxcompose>=1.4.0",
     "matplotlib>=3.10.1",
     "docxtpl>=0.19.1",
+    "xlsxwriter>=3.2.3",
 ]
