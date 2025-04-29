@@ -247,6 +247,7 @@ with tab1:
                 if st.button(f"Fill Missing Values ({missing_method})"):
                     cleaned_data = data_processor.fill_missing_values(method=method_map[missing_method])
                     st.session_state.data = cleaned_data
+                    st.session_state.cleaned_data = cleaned_data  # Keep cleaned_data in sync
                     st.success(f"Filled missing values using {missing_method.lower()}")
                     st.rerun()
             
@@ -264,6 +265,7 @@ with tab1:
                                 cleaned_data[col].fillna(str(fill_value), inplace=True)
                                 
                         st.session_state.data = cleaned_data
+                        st.session_state.cleaned_data = cleaned_data  # Keep cleaned_data in sync
                         st.success(f"Filled missing values with '{fill_value}'")
                         st.rerun()
                     except Exception as e:
@@ -312,6 +314,7 @@ with tab1:
                         if st.button(f"Remove {num_outliers} outliers from '{outlier_col}'"):
                             cleaned_data = st.session_state.data[~outliers].reset_index(drop=True)
                             st.session_state.data = cleaned_data
+                            st.session_state.cleaned_data = cleaned_data  # Keep cleaned_data in sync
                             st.success(f"Removed {num_outliers} outliers. New shape: {cleaned_data.shape}")
                             st.rerun()
         
@@ -346,6 +349,7 @@ with tab1:
                     converted_data[convert_col] = converted_data[convert_col].astype('category')
                 
                 st.session_state.data = converted_data
+                st.session_state.cleaned_data = converted_data  # Keep cleaned_data in sync
                 st.success(f"Converted '{convert_col}' to {target_type}")
                 st.rerun()
             except Exception as e:
