@@ -1,20 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" fill="none">
-  <!-- Background Circle -->
-  <circle cx="100" cy="100" r="95" fill="#3366FF" opacity="0.1"/>
-  <circle cx="100" cy="100" r="95" stroke="#3366FF" stroke-width="5"/>
+  <!-- Background Square with Rounded Corners -->
+  <rect x="10" y="10" width="180" height="180" rx="20" fill="#3366FF" opacity="0.1"/>
+  <rect x="10" y="10" width="180" height="180" rx="20" stroke="#3366FF" stroke-width="5"/>
+  
+  <!-- Easy Text -->
+  <path d="M30 65 H55 M30 75 H45 M30 85 H55" stroke="#3366FF" stroke-width="5" stroke-linecap="round"/>
   
   <!-- AI Letters -->
-  <path d="M55 75 L65 125 M60 100 H70" stroke="#3366FF" stroke-width="8" stroke-linecap="round"/>
-  <path d="M80 75 L80 125" stroke="#3366FF" stroke-width="8" stroke-linecap="round"/>
+  <path d="M65 65 L75 85 M70 75 H80" stroke="#3366FF" stroke-width="5" stroke-linecap="round"/>
+  <path d="M90 65 L90 85" stroke="#3366FF" stroke-width="5" stroke-linecap="round"/>
   
   <!-- Brain Icon -->
-  <path d="M120 70 C135 60 150 70 145 85 C160 85 160 105 145 110 C155 120 145 135 130 130 C125 145 105 145 100 130 C85 140 70 125 80 110 C65 105 70 85 85 85 C80 70 100 60 120 70Z" 
-        fill="none" stroke="#3366FF" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M120 60 C130 55 140 60 135 70 C145 70 145 80 135 85 C140 90 135 100 125 95 C122 105 110 105 107 95 C98 100 90 90 95 82 C85 80 90 70 97 70 C95 60 105 55 120 60Z" 
+        fill="none" stroke="#3366FF" stroke-width="3" stroke-linejoin="round"/>
   
-  <!-- Analytics Lines -->
-  <line x1="105" y1="160" x2="105" y2="140" stroke="#3366FF" stroke-width="6" stroke-linecap="round"/>
-  <line x1="120" y1="160" x2="120" y2="130" stroke="#3366FF" stroke-width="6" stroke-linecap="round"/>
-  <line x1="135" y1="160" x2="135" y2="150" stroke="#3366FF" stroke-width="6" stroke-linecap="round"/>
-  <line x1="90" y1="160" x2="90" y2="145" stroke="#3366FF" stroke-width="6" stroke-linecap="round"/>
+  <!-- Analytics Text -->
+  <path d="M30 110 L40 130 L50 110" stroke="#3366FF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M60 110 L60 130 M60 120 H70" stroke="#3366FF" stroke-width="5" stroke-linecap="round"/>
+  <path d="M80 110 L80 130 M80 110 H90" stroke="#3366FF" stroke-width="5" stroke-linecap="round"/>
+  <path d="M100 110 L100 130 M95 110 H105" stroke="#3366FF" stroke-width="5" stroke-linecap="round"/>
+  <path d="M120 110 L115 120 L130 120 L125 130" stroke="#3366FF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M145 110 L140 130 M135 120 H150" stroke="#3366FF" stroke-width="5" stroke-linecap="round"/>
+  <path d="M160 110 C175 110 175 130 160 130 C145 130 145 110 160 110Z" stroke="#3366FF" stroke-width="5" stroke-linecap="round"/>
+  
+  <!-- Analytics Chart Lines -->
+  <line x1="50" y1="160" x2="50" y2="145" stroke="#3366FF" stroke-width="6" stroke-linecap="round"/>
+  <line x1="75" y1="160" x2="75" y2="140" stroke="#3366FF" stroke-width="6" stroke-linecap="round"/>
+  <line x1="100" y1="160" x2="100" y2="150" stroke="#3366FF" stroke-width="6" stroke-linecap="round"/>
+  <line x1="125" y1="160" x2="125" y2="135" stroke="#3366FF" stroke-width="6" stroke-linecap="round"/>
+  <line x1="150" y1="160" x2="150" y2="142" stroke="#3366FF" stroke-width="6" stroke-linecap="round"/>
 </svg>

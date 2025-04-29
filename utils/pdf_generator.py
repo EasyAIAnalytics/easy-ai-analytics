@@ -83,7 +83,7 @@ class PDFGenerator:
         
         # Add title
         title_style = styles['Title']
-        content.append(Paragraph("AI Easy Analytics Report", title_style))
+        content.append(Paragraph("Easy AI Analytics Report", title_style))
         content.append(Spacer(1, 0.25*inch))
         
         # Add company and project info
