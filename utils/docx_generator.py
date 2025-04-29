@@ -194,10 +194,11 @@ CALCULATE(
             self._insert_formula(document, complex_example, is_dax=True)
             document.add_paragraph("This DAX measure calculates the total sales amount filtered by the currently selected product category.")
         
-        # Add a horizontal line for separation
+        # Add a horizontal line for separation (using a run with underscore characters instead of border)
         p = document.add_paragraph()
-        p.paragraph_format.bottom_border.space = Pt(2)
-        p.paragraph_format.bottom_border.width = 0.5
+        run = p.add_run('_' * 60)  # Add a line of underscores
+        run.font.size = Pt(8)
+        run.font.color.rgb = RGBColor(200, 200, 200)  # Light gray
 
     def generate_docx(self):
         """
