@@ -10,6 +10,7 @@ import os
 import time
 import re
 import trafilatura
+import functools
 from datetime import datetime, timedelta
 import requests
 from io import StringIO
@@ -27,6 +28,178 @@ st.set_page_config(
 st.markdown('<h1 class="main-header">Data Enrichment</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-header">Enhance your dataset with external data from various sources</p>', unsafe_allow_html=True)
 
+# Define utility functions for lookups
+def excel_vlookup(df, lookup_value, lookup_col, return_col, exact_match=True):
+    """
+    Implementation of Excel's VLOOKUP function
+    
+    Args:
+        df (pd.DataFrame): The dataframe to search in
+        lookup_value: The value to find in the lookup column
+        lookup_col (str): The column to search in
+        return_col (str): The column to return a value from
+        exact_match (bool): Whether to require an exact match
+        
+    Returns:
+        The matching value or None if not found
+    """
+    # For exact match
+    if exact_match:
+        try:
+            # Find the matching row and return the value from return_col
+            result = df[df[lookup_col] == lookup_value][return_col]
+            return result.iloc[0] if not result.empty else None
+        except:
+            return None
+    else:
+        # For approximate match (like Excel's VLOOKUP with FALSE)
+        try:
+            # Sort the dataframe by the lookup column
+            sorted_df = df.sort_values(by=lookup_col)
+            
+            # Find the largest value in lookup_col that is less than or equal to lookup_value
+            mask = sorted_df[lookup_col] <= lookup_value
+            if not mask.any():
+                return None
+            
+            match_idx = mask.iloc[:-1].argmin() if mask.iloc[-1] else mask.argmin()
+            return sorted_df.iloc[match_idx][return_col]
+        except:
+            return None
+
+def excel_hlookup(df, lookup_value, lookup_row_idx, return_row_idx, exact_match=True):
+    """
+    Implementation of Excel's HLOOKUP function
+    
+    Args:
+        df (pd.DataFrame): The dataframe to search in
+        lookup_value: The value to find in the lookup row
+        lookup_row_idx (int): The row index to search in (0-based)
+        return_row_idx (int): The row index to return a value from
+        exact_match (bool): Whether to require an exact match
+        
+    Returns:
+        The matching value or None if not found
+    """
+    try:
+        # Transpose the dataframe to use the same logic as VLOOKUP
+        transposed = df.T
+        return excel_vlookup(transposed, lookup_value, lookup_row_idx, return_row_idx, exact_match)
+    except:
+        return None
+
+def excel_xlookup(df, lookup_value, lookup_array, return_array, if_not_found=None):
+    """
+    Implementation of Excel's XLOOKUP function
+    
+    Args:
+        df (pd.DataFrame): The dataframe to search in
+        lookup_value: The value to find
+        lookup_array (str): The column to search in
+        return_array (str): The column to return a value from
+        if_not_found: Value to return if not found
+        
+    Returns:
+        The matching value or if_not_found if no match
+    """
+    try:
+        result = df[df[lookup_array] == lookup_value][return_array]
+        return result.iloc[0] if not result.empty else if_not_found
+    except:
+        return if_not_found
+
+def dax_lookupvalue(df, result_column, search_column, search_value, *additional_filters):
+    """
+    Implementation of DAX's LOOKUPVALUE function
+    
+    Args:
+        df (pd.DataFrame): The dataframe to search in
+        result_column (str): The column to return a value from
+        search_column (str): The column to search in
+        search_value: The value to find
+        *additional_filters: Additional (column, value) pairs for filtering
+        
+    Returns:
+        The matching value or None if not found
+    """
+    try:
+        # Start with the basic filter
+        mask = df[search_column] == search_value
+        
+        # Add additional filters
+        for i in range(0, len(additional_filters), 2):
+            if i+1 < len(additional_filters):
+                filter_col = additional_filters[i]
+                filter_val = additional_filters[i+1]
+                mask = mask & (df[filter_col] == filter_val)
+        
+        # Get the filtered result
+        result = df[mask][result_column]
+        return result.iloc[0] if not result.empty else None
+    except:
+        return None
+
+def apply_formula_to_column(df, formula_type, params):
+    """
+    Apply a formula to an entire column or create a new column
+    
+    Args:
+        df (pd.DataFrame): The dataframe to modify
+        formula_type (str): The type of formula to apply
+        params (dict): Parameters for the formula
+        
+    Returns:
+        pd.DataFrame: The modified dataframe
+    """
+    result_df = df.copy()
+    
+    if formula_type == "VLOOKUP":
+        lookup_col = params.get("lookup_column")
+        table_df = params.get("table_df")
+        table_lookup_col = params.get("table_lookup_column")
+        table_return_col = params.get("table_return_column")
+        result_col = params.get("result_column")
+        exact_match = params.get("exact_match", True)
+        
+        # Create a vectorized lookup function
+        def lookup_func(x):
+            return excel_vlookup(table_df, x, table_lookup_col, table_return_col, exact_match)
+        
+        # Apply the function to create the new column
+        result_df[result_col] = result_df[lookup_col].apply(lookup_func)
+        
+    elif formula_type == "XLOOKUP":
+        lookup_col = params.get("lookup_column")
+        table_df = params.get("table_df")
+        table_lookup_col = params.get("table_lookup_column")
+        table_return_col = params.get("table_return_column")
+        result_col = params.get("result_column")
+        if_not_found = params.get("if_not_found")
+        
+        # Create a vectorized lookup function
+        def lookup_func(x):
+            return excel_xlookup(table_df, x, table_lookup_col, table_return_col, if_not_found)
+        
+        # Apply the function to create the new column
+        result_df[result_col] = result_df[lookup_col].apply(lookup_func)
+        
+    elif formula_type == "DAX_LOOKUPVALUE":
+        lookup_col = params.get("lookup_column")
+        table_df = params.get("table_df")
+        table_lookup_col = params.get("table_lookup_column")
+        table_return_col = params.get("table_return_column")
+        result_col = params.get("result_column")
+        additional_filters = params.get("additional_filters", [])
+        
+        # Create a vectorized lookup function
+        def lookup_func(x):
+            return dax_lookupvalue(table_df, table_return_col, table_lookup_col, x, *additional_filters)
+        
+        # Apply the function to create the new column
+        result_df[result_col] = result_df[lookup_col].apply(lookup_func)
+    
+    return result_df
+
 # Initialize session state
 if "data" not in st.session_state:
     st.session_state.data = None
@@ -37,15 +210,19 @@ if "cleaned_data" not in st.session_state:
 if "enriched_data" not in st.session_state:
     st.session_state.enriched_data = None
 
+if "lookup_tables" not in st.session_state:
+    st.session_state.lookup_tables = {}
+
 # Check if data is available
 if st.session_state.data is None:
     st.warning("Please upload data in the main dashboard before using enrichment features.")
 else:
     # Create tabs for different enrichment features
-    tab1, tab2, tab3 = st.tabs([
+    tab1, tab2, tab3, tab4 = st.tabs([
         "Web Scraping Integration",
         "Geospatial Analysis",
-        "Data Merging & Transformation"
+        "Data Merging & Transformation",
+        "Advanced Formulas & Lookups"
     ])
     
     with tab1:
