@@ -449,18 +449,14 @@ with tab2:
                 
                 comparison_df = pd.DataFrame(comparison_data)
                 
-                # Use color formatting
-                def color_status(val):
-                    if val == "Higher":
-                        return 'background-color: rgba(0, 128, 0, 0.2)'
-                    elif val == "Lower":
-                        return 'background-color: rgba(255, 0, 0, 0.2)'
-                    else:
-                        return 'background-color: rgba(128, 128, 128, 0.2)'
+                # Instead of using applymap with styling which can cause errors, let's use a simpler approach
+                # Add emoji indicators to make status more visible
+                comparison_df['Visual Status'] = comparison_df['Status'].apply(
+                    lambda x: "✅ Higher" if x == "Higher" else "❌ Lower" if x == "Lower" else "➖ Same"
+                )
                 
-                # Apply the styling and display
-                styled_df = comparison_df.style.applymap(color_status, subset=['Status'])
-                st.dataframe(styled_df, use_container_width=True)
+                # Display the dataframe without styling
+                st.dataframe(comparison_df, use_container_width=True)
                 
                 # Recommendations based on benchmark comparison
                 st.markdown("#### Insights & Recommendations")
@@ -974,7 +970,7 @@ with tab3:
                             "Current Profit/Loss",
                             f"${current_profit:,.2f}",
                             delta=f"{profit_status}: {abs(current_profit/fixed_costs*100):.1f}% of fixed costs",
-                            delta_color=profit_color
+                            delta_color="normal"  # Using 'normal' instead of custom colors
                         )
                         
                         # Percentage of break-even
