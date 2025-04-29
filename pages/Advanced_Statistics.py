@@ -12,6 +12,8 @@ import pymc as pm
 import arviz as az
 import matplotlib.pyplot as plt
 from io import BytesIO
+import time
+import traceback
 
 # Page configuration
 st.set_page_config(
@@ -80,7 +82,8 @@ with tab1:
                 # Select group column (categorical)
                 group_column = st.selectbox(
                     "Select Group Column (categorical):",
-                    categorical_columns
+                    categorical_columns,
+                    key="hypothesis_group_column"
                 )
                 
                 # Show group counts
@@ -97,7 +100,8 @@ with tab1:
                 # Select value column (numeric)
                 value_column = st.selectbox(
                     "Select Value Column (numeric):",
-                    numeric_columns
+                    numeric_columns,
+                    key="hypothesis_value_column"
                 )
                 
                 # Set significance level
@@ -1472,12 +1476,14 @@ with tab3:
                     # Select columns for A/B testing
                     group_column = st.selectbox(
                         "Select Group Column (categorical):",
-                        categorical_columns
+                        categorical_columns,
+                        key="bayesian_group_column"
                     )
                     
                     metric_column = st.selectbox(
                         "Select Metric Column (numeric):",
-                        numeric_columns
+                        numeric_columns,
+                        key="bayesian_metric_column"
                     )
                     
                     # Show group counts
@@ -1491,11 +1497,11 @@ with tab3:
                             
                             # Let user select exactly 2 groups
                             group_options = sorted(group_counts.index.tolist())
-                            group_a = st.selectbox("Select Group A:", group_options, index=0)
+                            group_a = st.selectbox("Select Group A:", group_options, index=0, key="bayesian_group_a")
                             
                             # Filter options for group B to prevent selecting same as group A
                             group_b_options = [g for g in group_options if g != group_a]
-                            group_b = st.selectbox("Select Group B:", group_b_options, index=0)
+                            group_b = st.selectbox("Select Group B:", group_b_options, index=0, key="bayesian_group_b")
                         else:
                             # Exactly 2 groups, use them directly
                             group_options = sorted(group_counts.index.tolist())
@@ -1532,7 +1538,8 @@ with tab3:
                     
                     prior_type = st.selectbox(
                         "Prior Type:",
-                        ["Uninformative", "Weakly Informative"]
+                        ["Uninformative", "Weakly Informative"],
+                        key="bayesian_prior_type"
                     )
                     
                     # Button to run A/B testing
