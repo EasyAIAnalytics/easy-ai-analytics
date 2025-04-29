@@ -75,9 +75,15 @@ class PDFGenerator:
         # Create a list to store content
         content = []
         
+        # Add logo
+        logo_path = 'assets/logo.svg'
+        if os.path.exists(logo_path):
+            content.append(Image(logo_path, width=2*inch, height=2*inch))
+            content.append(Spacer(1, 0.1*inch))
+        
         # Add title
         title_style = styles['Title']
-        content.append(Paragraph("Business Analytics Report", title_style))
+        content.append(Paragraph("AI Easy Analytics Report", title_style))
         content.append(Spacer(1, 0.25*inch))
         
         # Add company and project info

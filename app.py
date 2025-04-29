@@ -12,8 +12,8 @@ import database as db
 
 # Page configuration
 st.set_page_config(
-    page_title="Business Analytics Dashboard",
-    page_icon="📊",
+    page_title="AI Easy Analytics",
+    page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -23,8 +23,8 @@ with open('assets/styles.css') as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 # App title and description with custom styling
-st.markdown('<h1 class="main-header">Business Analytics & Data Analytics</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">Transform your data into actionable insights with our powerful analytics platform</p>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-header">AI Easy Analytics</h1>', unsafe_allow_html=True)
+st.markdown('<p class="sub-header">Transform your data into actionable insights with our AI-powered analytics platform</p>', unsafe_allow_html=True)
 
 # Create assets directory if it doesn't exist
 if not os.path.exists("assets"):

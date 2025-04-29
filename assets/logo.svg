@@ -1,25 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="240" height="240" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Main Circle -->
-  <circle cx="120" cy="120" r="110" fill="#3366FF" filter="drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.2))"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" fill="none">
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="95" fill="#3366FF" opacity="0.1"/>
+  <circle cx="100" cy="100" r="95" stroke="#3366FF" stroke-width="5"/>
   
-  <!-- Gear Icon Background -->
-  <circle cx="120" cy="120" r="90" fill="#FFFFFF" filter="drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.1))"/>
+  <!-- AI Letters -->
+  <path d="M55 75 L65 125 M60 100 H70" stroke="#3366FF" stroke-width="8" stroke-linecap="round"/>
+  <path d="M80 75 L80 125" stroke="#3366FF" stroke-width="8" stroke-linecap="round"/>
   
-  <!-- Bar Chart -->
-  <rect x="70" y="120" width="20" height="40" fill="#3366FF" rx="4"/>
-  <rect x="100" y="100" width="20" height="60" fill="#3366FF" rx="4"/>
-  <rect x="130" y="80" width="20" height="80" fill="#3366FF" rx="4"/>
-  <rect x="160" y="60" width="20" height="100" fill="#3366FF" rx="4"/>
+  <!-- Brain Icon -->
+  <path d="M120 70 C135 60 150 70 145 85 C160 85 160 105 145 110 C155 120 145 135 130 130 C125 145 105 145 100 130 C85 140 70 125 80 110 C65 105 70 85 85 85 C80 70 100 60 120 70Z" 
+        fill="none" stroke="#3366FF" stroke-width="4" stroke-linejoin="round"/>
   
-  <!-- Line Chart Overlay -->
-  <path d="M70 140 Q 95 100 120 120 Q 145 140 170 80" stroke="#FFD700" stroke-width="4" fill="none" filter="drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.2))"/>
-  
-  <!-- Analytics Text -->
-  <text x="120" y="185" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#3366FF">ANALYTICS</text>
-  
-  <!-- Decorative Elements -->
-  <circle cx="70" y="140" r="4" fill="#FFD700"/>
-  <circle cx="120" y="120" r="4" fill="#FFD700"/>
-  <circle cx="170" y="80" r="4" fill="#FFD700"/>
+  <!-- Analytics Lines -->
+  <line x1="105" y1="160" x2="105" y2="140" stroke="#3366FF" stroke-width="6" stroke-linecap="round"/>
+  <line x1="120" y1="160" x2="120" y2="130" stroke="#3366FF" stroke-width="6" stroke-linecap="round"/>
+  <line x1="135" y1="160" x2="135" y2="150" stroke="#3366FF" stroke-width="6" stroke-linecap="round"/>
+  <line x1="90" y1="160" x2="90" y2="145" stroke="#3366FF" stroke-width="6" stroke-linecap="round"/>
 </svg>
