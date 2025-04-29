@@ -28,6 +28,14 @@ st.set_page_config(
 st.markdown('<h1 class="main-header">Data Enrichment</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-header">Enhance your dataset with external data from various sources</p>', unsafe_allow_html=True)
 
+# Initialize session state variables if they don't exist
+if 'data' not in st.session_state or st.session_state.data is None:
+    st.warning("Please upload data in the main dashboard before using this page.")
+    st.stop()
+
+if 'cleaned_data' not in st.session_state:
+    st.session_state.cleaned_data = st.session_state.data.copy()
+
 # Define utility functions for lookups
 def excel_vlookup(df, lookup_value, lookup_col, return_col, exact_match=True):
     """
