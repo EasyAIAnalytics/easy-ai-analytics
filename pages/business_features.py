@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 from datetime import datetime, timedelta
 import json
 import os
+import time
 import database as db
 from sklearn.cluster import KMeans
 from utils.ai_analytics import AIAnalytics

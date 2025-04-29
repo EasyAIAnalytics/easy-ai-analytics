@@ -101,6 +101,14 @@ class AIAnalytics:
         # Get clean data for forecasting
         forecast_data = self.data[[date_column, value_column]].dropna()
         
+        # Ensure value column contains numeric data
+        try:
+            forecast_data[value_column] = pd.to_numeric(forecast_data[value_column], errors='coerce')
+            # Drop rows where conversion to numeric failed
+            forecast_data = forecast_data.dropna()
+        except Exception as e:
+            raise ValueError(f"Failed to convert '{value_column}' to numeric values: {str(e)}")
+        
         if len(forecast_data) < 10:
             raise ValueError("Insufficient data points for forecasting (minimum 10 required)")
             
