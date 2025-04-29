@@ -674,7 +674,8 @@ if st.session_state.data is not None:
     - A professional business analyst dashboard
     - A functional data analyst dashboard
     - A beautiful UI (Tailwind CSS based)
-    - Real file download (PDF)
+    - Multiple report formats (PDF and DOCX with Excel formulas)
+    - Excel-style formula support with DAX, VLOOKUP, HLOOKUP, XLOOKUP
     - Smart insight generation
     - Advanced chart customization
     - Time series analysis
@@ -715,7 +716,8 @@ else:
         st.subheader("Business Intelligence")
         st.markdown("""
         - Automated insights generation
-        - Professional PDF reports
+        - Professional reports (PDF & DOCX)
+        - Excel formula support (DAX, VLOOKUP, etc.)
         - Business requirements form
         - Data statistics dashboard
         - Custom metric tracking

@@ -5,6 +5,8 @@ import datetime
 import database as db
 from utils.data_processor import DataProcessor
 from utils.visualizer import Visualizer
+from utils.pdf_generator import PDFGenerator
+from utils.docx_generator import DocxGenerator
 
 # Page configuration
 st.set_page_config(
@@ -151,17 +153,38 @@ with tab2:
         )
         
         if selected_report_id:
-            pdf_data = db.get_report(selected_report_id)
-            if pdf_data:
-                report_info = next((r for r in st.session_state.db_reports if r[0] == selected_report_id), None)
-                filename = f"{report_info[2]}_{report_info[1]}.pdf" if report_info else "report.pdf"
-                
-                st.download_button(
-                    label="Download Report",
-                    data=pdf_data,
-                    file_name=filename,
-                    mime="application/pdf"
-                )
+            report_info = next((r for r in st.session_state.db_reports if r[0] == selected_report_id), None)
+            
+            # Create columns for different download formats
+            dl_col1, dl_col2 = st.columns(2)
+            
+            # PDF Download
+            with dl_col1:
+                pdf_data = db.get_report(selected_report_id, format='pdf')
+                if pdf_data:
+                    pdf_filename = f"{report_info[2]}_{report_info[1]}.pdf" if report_info else "report.pdf"
+                    
+                    st.download_button(
+                        label="Download PDF Report",
+                        data=pdf_data,
+                        file_name=pdf_filename,
+                        mime="application/pdf"
+                    )
+            
+            # DOCX Download
+            with dl_col2:
+                docx_data = db.get_report(selected_report_id, format='docx')
+                if docx_data:
+                    docx_filename = f"{report_info[2]}_{report_info[1]}.docx" if report_info else "report.docx"
+                    
+                    st.download_button(
+                        label="Download DOCX Report",
+                        data=docx_data,
+                        file_name=docx_filename,
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    )
+                else:
+                    st.info("No DOCX version available for this report")
     else:
         st.info("No reports saved in the database. Generate and save a report first.")
     
@@ -172,12 +195,10 @@ with tab2:
         if st.button("Generate and Save New Report"):
             try:
                 with st.spinner("Generating and saving report..."):
-                    from utils.pdf_generator import PDFGenerator
-                    
                     if st.session_state.cleaned_data is not None:
                         visualizer = Visualizer(st.session_state.cleaned_data)
                         
-                        # Generate plots for the PDF
+                        # Generate plots for the reports
                         missing_fig = visualizer.plot_missing_values()
                         
                         numeric_columns = st.session_state.cleaned_data.select_dtypes(include=['int64', 'float64']).columns.tolist()
@@ -204,12 +225,25 @@ with tab2:
                         )
                         pdf_bytes = pdf_generator.generate_pdf()
                         
-                        # Save to database
+                        # Generate DOCX with Excel formulas
+                        docx_generator = DocxGenerator(
+                            st.session_state.form_data,
+                            st.session_state.cleaned_data,
+                            st.session_state.insights,
+                            missing_fig,
+                            num_fig,
+                            cat_fig
+                        )
+                        docx_bytes = docx_generator.generate_docx()
+                        
+                        # Save both formats to database
                         report_id = db.save_report(
                             title=st.session_state.form_data.get('project_title', 'Analytics Report'),
                             company_name=st.session_state.form_data.get('company_name', ''),
                             description=st.session_state.form_data.get('objectives', ''),
-                            pdf_data=pdf_bytes
+                            pdf_data=pdf_bytes,
+                            docx_data=docx_bytes,
+                            report_format='both'
                         )
                         
                         st.success(f"Report saved successfully with ID: {report_id}")
