@@ -309,7 +309,8 @@ with tab1:
                                 f_statistic, p_value = stats.f_oneway(*group_data)
                                 
                                 # Calculate effect size (Eta-squared)
-                                formula = f"{value_column} ~ C({group_column})"
+                                # Handle column names with spaces by quoting them with Q()
+                                formula = f"Q('{value_column}') ~ C(Q('{group_column}'))"
                                 model = ols(formula, data=test_data).fit()
                                 anova_table = sm.stats.anova_lm(model, typ=2)
                                 
@@ -923,14 +924,14 @@ with tab2:
                             # Display results
                             st.markdown("#### Regression Results")
                             
-                            # Create summary table
+                            # Create summary table with proper indexing for parameters with spaces
                             coef_df = pd.DataFrame({
                                 'Variable': ['Intercept'] + predictor_vars,
-                                'Coefficient': [model.params['const']] + [model.params[x] for x in predictor_vars],
-                                'Std Error': [model.bse['const']] + [model.bse[x] for x in predictor_vars],
-                                't-value': [model.tvalues['const']] + [model.tvalues[x] for x in predictor_vars],
-                                'p-value': [model.pvalues['const']] + [model.pvalues[x] for x in predictor_vars],
-                                'Significant': [model.pvalues['const'] < 0.05] + [model.pvalues[x] < 0.05 for x in predictor_vars]
+                                'Coefficient': [model.params.loc['const']] + [model.params.loc[x] for x in predictor_vars],
+                                'Std Error': [model.bse.loc['const']] + [model.bse.loc[x] for x in predictor_vars],
+                                't-value': [model.tvalues.loc['const']] + [model.tvalues.loc[x] for x in predictor_vars],
+                                'p-value': [model.pvalues.loc['const']] + [model.pvalues.loc[x] for x in predictor_vars],
+                                'Significant': [model.pvalues.loc['const'] < 0.05] + [model.pvalues.loc[x] < 0.05 for x in predictor_vars]
                             })
                             
                             # Display model metrics
@@ -948,10 +949,10 @@ with tab2:
                             # Display coefficient table
                             st.dataframe(coef_df.round(4), use_container_width=True)
                             
-                            # Create equation string
-                            equation = f"{target_var} = {model.params['const']:.4f}"
+                            # Create equation string with proper indexing for parameters with spaces
+                            equation = f"{target_var} = {model.params.loc['const']:.4f}"
                             for var in predictor_vars:
-                                coef = model.params[var]
+                                coef = model.params.loc[var]
                                 sign = '+' if coef >= 0 else '-'
                                 equation += f" {sign} {abs(coef):.4f} × {var}"
                             
