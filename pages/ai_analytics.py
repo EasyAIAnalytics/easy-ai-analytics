@@ -368,6 +368,8 @@ with tab2:
     # Check if API keys are available
     if not OPENAI_API_KEY and not ANTHROPIC_API_KEY:
         st.warning("AI-generated insights require either an OpenAI or Anthropic API key. Please provide one in the settings.")
+        st.info(f"DEBUG - OPENAI_API_KEY available: {'Yes' if OPENAI_API_KEY else 'No'}")
+        st.info(f"DEBUG - ANTHROPIC_API_KEY available: {'Yes' if ANTHROPIC_API_KEY else 'No'}")
     else:
         # AI insight generation options
         st.markdown("#### Configure AI Insight Generation")
@@ -432,10 +434,25 @@ with tab2:
             progress_bar.progress(30)
             
             try:
-                # Filter data if columns selected
+                # Debug the OpenAI API key availability 
+                st.session_state['openai_key_debug'] = "Available" if OPENAI_API_KEY else "Not available"
+                st.session_state['anthropic_key_debug'] = "Available" if ANTHROPIC_API_KEY else "Not available"
+                
+                # Prepare data for analysis
                 if selected_columns:
                     analysis_data = st.session_state.cleaned_data[selected_columns].copy()
                     ai_analytics = AIAnalytics(analysis_data)
+                else:
+                    # Use all data if no columns selected
+                    ai_analytics = AIAnalytics(st.session_state.cleaned_data.copy())
+                
+                # Make sure ai_analytics object is properly initialized
+                if not hasattr(ai_analytics, 'data') or ai_analytics.data is None or len(ai_analytics.data) == 0:
+                    raise ValueError("AIAnalytics initialized with empty or invalid data")
+                
+                # Check that the API clients are available
+                if not ai_analytics.has_openai and not ai_analytics.has_anthropic:
+                    raise ValueError("No AI API client available. Please add OpenAI or Anthropic API key.")
                 
                 # Generate insights with AI
                 insights = ai_analytics.generate_insights_with_ai(max_insights=num_insights)
