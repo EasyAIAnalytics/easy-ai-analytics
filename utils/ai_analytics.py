@@ -347,7 +347,15 @@ class AIAnalytics:
             return insights[:max_insights]
             
         except Exception as e:
-            return [f"Error generating AI insights: {str(e)}"]
+            error_message = str(e)
+            
+            # Check for common OpenAI API errors
+            if "insufficient_quota" in error_message or "quota" in error_message:
+                return [f"Error generating AI insights: OpenAI API quota exceeded. Please check your API key billing and quota limits."]
+            elif "rate limit" in error_message.lower() or "rate_limit" in error_message.lower():
+                return [f"Error generating AI insights: OpenAI API rate limit reached. Please try again in a few minutes."]
+            else:
+                return [f"Error generating AI insights: {error_message}"]
     
     def analyze_sentiment(self, text_column):
         """
@@ -445,9 +453,19 @@ class AIAnalytics:
                     time.sleep(0.5)
                     
             except Exception as e:
+                error_message = str(e)
+                
+                # Check for common OpenAI API errors
+                if "insufficient_quota" in error_message or "quota" in error_message:
+                    error_detail = "OpenAI API quota exceeded. Please check your API key billing and quota limits."
+                elif "rate limit" in error_message.lower() or "rate_limit" in error_message.lower():
+                    error_detail = "OpenAI API rate limit reached. Please try again in a few minutes."
+                else:
+                    error_detail = error_message
+                    
                 results.append({
                     "text": text[:100] + "..." if len(text) > 100 else text,
-                    "error": str(e)
+                    "error": error_detail
                 })
         
         # Calculate summary statistics
