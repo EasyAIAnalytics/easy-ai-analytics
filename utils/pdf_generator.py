@@ -93,14 +93,14 @@ class PDFGenerator:
                         drawing = svg2rlg(logo_path)
                         renderPM.drawToFile(drawing, temp_png, fmt='PNG')
                         content.append(Image(temp_png, width=2*inch, height=2*inch))
-                        temp_images.append(temp_png)  # Add to temp files for cleanup
-                    except:
+                        self.temp_images.append(temp_png)  # Add to temp files for cleanup
+                    except Exception as e:
                         # If SVG conversion fails, add a text header instead
                         content.append(Paragraph("Easy AI Analytics", styles['Title']))
             else:
                 # If no logo file, add a text header
                 content.append(Paragraph("Easy AI Analytics", styles['Title']))
-        except:
+        except Exception as e:
             # Fallback to text if any error occurs
             content.append(Paragraph("Easy AI Analytics", styles['Title']))
             
@@ -152,17 +152,13 @@ class PDFGenerator:
         if any([self.missing_fig, self.numeric_fig, self.categorical_fig]):
             content.append(Paragraph("Data Visualizations", section_style))
             
-            # Initialize temp_images list if it doesn't exist
-        if not 'temp_images' in locals():
-            temp_images = []
-            
             if self.missing_fig:
                 try:
                     img_path = self._save_figure_as_image(self.missing_fig)
                     content.append(Paragraph("Missing Values Chart", styles['Heading3']))
                     content.append(Image(img_path, width=6*inch, height=4*inch))
                     content.append(Spacer(1, 0.2*inch))
-                    temp_images.append(img_path)
+                    self.temp_images.append(img_path)
                 except Exception as e:
                     content.append(Paragraph(f"Error generating missing values chart: {e}", styles['Normal']))
             
@@ -172,7 +168,7 @@ class PDFGenerator:
                     content.append(Paragraph("Numeric Distribution Chart", styles['Heading3']))
                     content.append(Image(img_path, width=6*inch, height=4*inch))
                     content.append(Spacer(1, 0.2*inch))
-                    temp_images.append(img_path)
+                    self.temp_images.append(img_path)
                 except Exception as e:
                     content.append(Paragraph(f"Error generating numeric distribution chart: {e}", styles['Normal']))
             
@@ -182,7 +178,7 @@ class PDFGenerator:
                     content.append(Paragraph("Categorical Distribution Chart", styles['Heading3']))
                     content.append(Image(img_path, width=6*inch, height=4*inch))
                     content.append(Spacer(1, 0.2*inch))
-                    temp_images.append(img_path)
+                    self.temp_images.append(img_path)
                 except Exception as e:
                     content.append(Paragraph(f"Error generating categorical distribution chart: {e}", styles['Normal']))
         
@@ -240,9 +236,9 @@ class PDFGenerator:
         
         content.append(table)
         
-        # Define temp_images as an empty list if not already defined
-        if not 'temp_images' in locals():
-            temp_images = []
+        # Ensure self.temp_images is defined
+        if not hasattr(self, 'temp_images'):
+            self.temp_images = []
             
         # Build the PDF document
         try:
@@ -258,7 +254,7 @@ class PDFGenerator:
             simple_doc.build(error_content)
             
         # Clean up temporary image files
-        for img_path in temp_images:
+        for img_path in self.temp_images:
             try:
                 os.unlink(img_path)
             except:
