@@ -3007,3 +3007,518 @@ else:
                     st.info("Enriched data has been discarded")
         
         st.markdown('</div>', unsafe_allow_html=True)
+        
+    with tab4:
+        st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
+        st.markdown("### Advanced Formulas & Lookups")
+        st.markdown("""
+        Apply Excel and Power BI style formulas to your data including VLOOKUP, HLOOKUP, XLOOKUP, and DAX formulas.
+        These tools help you enhance your dataset with lookups and calculations commonly used in Excel and Power BI.
+        """)
+        
+        # Create subtabs for different formula types
+        formula_tabs = st.tabs(["VLOOKUP", "XLOOKUP", "DAX LOOKUPVALUE", "Upload Lookup Table"])
+        
+        with formula_tabs[0]:  # VLOOKUP
+            st.markdown("#### VLOOKUP Formula")
+            st.markdown("""
+            VLOOKUP searches for a value in the leftmost column of a table, and returns a value in the same row from a column you specify.
+            """)
+            
+            # Show available columns
+            columns = st.session_state.cleaned_data.columns.tolist()
+            
+            # Get available lookup tables
+            lookup_tables = list(st.session_state.lookup_tables.keys())
+            
+            if not lookup_tables:
+                st.info("You need to upload a lookup table first. Go to the 'Upload Lookup Table' tab to add one.")
+            else:
+                # Select lookup column in main data
+                lookup_col = st.selectbox(
+                    "Select Column with Values to Look Up",
+                    columns,
+                    key="vlookup_lookup_col"
+                )
+                
+                # Select lookup table
+                lookup_table_name = st.selectbox(
+                    "Select Lookup Table",
+                    lookup_tables,
+                    key="vlookup_table"
+                )
+                
+                lookup_table = st.session_state.lookup_tables[lookup_table_name]
+                lookup_table_columns = lookup_table.columns.tolist()
+                
+                # Select lookup column in lookup table
+                table_lookup_col = st.selectbox(
+                    "Select Column to Search In (in Lookup Table)",
+                    lookup_table_columns,
+                    key="vlookup_table_lookup_col"
+                )
+                
+                # Select return column in lookup table
+                table_return_col = st.selectbox(
+                    "Select Column to Return Value From (in Lookup Table)",
+                    lookup_table_columns,
+                    key="vlookup_table_return_col"
+                )
+                
+                # Name for new column
+                result_col = st.text_input(
+                    "New Column Name",
+                    f"vlookup_{table_return_col}",
+                    key="vlookup_result_col"
+                )
+                
+                # Exact match option
+                exact_match = st.checkbox(
+                    "Require Exact Match",
+                    True,
+                    key="vlookup_exact_match",
+                    help="If checked, only exact matches will return values. If unchecked, approximate matches will be found."
+                )
+                
+                # Example syntax
+                st.markdown("#### Formula Preview")
+                formula = f"VLOOKUP([{lookup_col}], [{lookup_table_name}], [{table_return_col}], {str(exact_match).upper()})"
+                st.code(formula)
+                
+                # Preview of lookup table
+                with st.expander("Preview Lookup Table"):
+                    st.dataframe(lookup_table.head(5), use_container_width=True)
+                
+                # Apply button
+                if st.button("Apply VLOOKUP", key="apply_vlookup"):
+                    # Create a progress bar
+                    progress_bar = st.progress(0)
+                    status_text = st.empty()
+                    
+                    # Update progress
+                    status_text.text("Applying VLOOKUP formula...")
+                    progress_bar.progress(30)
+                    
+                    try:
+                        # Set up parameters
+                        params = {
+                            "lookup_column": lookup_col,
+                            "table_df": lookup_table,
+                            "table_lookup_column": table_lookup_col,
+                            "table_return_column": table_return_col,
+                            "result_column": result_col,
+                            "exact_match": exact_match
+                        }
+                        
+                        # Apply formula
+                        result_df = apply_formula_to_column(
+                            st.session_state.cleaned_data,
+                            "VLOOKUP",
+                            params
+                        )
+                        
+                        # Update progress
+                        progress_bar.progress(70)
+                        status_text.text("Processing results...")
+                        
+                        # Update session state
+                        st.session_state.enriched_data = result_df
+                        
+                        # Update progress
+                        progress_bar.progress(100)
+                        status_text.text("VLOOKUP applied successfully!")
+                        
+                        # Clear progress indicators after a delay
+                        time.sleep(0.5)
+                        progress_bar.empty()
+                        status_text.empty()
+                        
+                        # Show results
+                        st.success(f"VLOOKUP formula applied! New column '{result_col}' added to your data.")
+                        
+                        # Preview results
+                        st.markdown("#### Results Preview")
+                        preview_cols = [lookup_col, result_col]
+                        st.dataframe(result_df[preview_cols].head(10), use_container_width=True)
+                    
+                    except Exception as e:
+                        # Update progress
+                        progress_bar.progress(100)
+                        status_text.text("Error applying VLOOKUP!")
+                        
+                        # Clear progress indicators after a delay
+                        time.sleep(0.5)
+                        progress_bar.empty()
+                        status_text.empty()
+                        
+                        st.error(f"Error applying VLOOKUP: {str(e)}")
+                
+        with formula_tabs[1]:  # XLOOKUP
+            st.markdown("#### XLOOKUP Formula")
+            st.markdown("""
+            XLOOKUP is the modern replacement for VLOOKUP that can search in any direction and return values from any direction.
+            It's more flexible and powerful than VLOOKUP.
+            """)
+            
+            # Show available columns
+            columns = st.session_state.cleaned_data.columns.tolist()
+            
+            # Get available lookup tables
+            lookup_tables = list(st.session_state.lookup_tables.keys())
+            
+            if not lookup_tables:
+                st.info("You need to upload a lookup table first. Go to the 'Upload Lookup Table' tab to add one.")
+            else:
+                # Select lookup column in main data
+                lookup_col = st.selectbox(
+                    "Select Column with Values to Look Up",
+                    columns,
+                    key="xlookup_lookup_col"
+                )
+                
+                # Select lookup table
+                lookup_table_name = st.selectbox(
+                    "Select Lookup Table",
+                    lookup_tables,
+                    key="xlookup_table"
+                )
+                
+                lookup_table = st.session_state.lookup_tables[lookup_table_name]
+                lookup_table_columns = lookup_table.columns.tolist()
+                
+                # Select lookup column in lookup table
+                table_lookup_col = st.selectbox(
+                    "Select Column to Search In (in Lookup Table)",
+                    lookup_table_columns,
+                    key="xlookup_table_lookup_col"
+                )
+                
+                # Select return column in lookup table
+                table_return_col = st.selectbox(
+                    "Select Column to Return Value From (in Lookup Table)",
+                    lookup_table_columns,
+                    key="xlookup_table_return_col"
+                )
+                
+                # Name for new column
+                result_col = st.text_input(
+                    "New Column Name",
+                    f"xlookup_{table_return_col}",
+                    key="xlookup_result_col"
+                )
+                
+                # If not found value
+                if_not_found = st.text_input(
+                    "Value if Not Found",
+                    "Not Found",
+                    key="xlookup_if_not_found"
+                )
+                
+                # Example syntax
+                st.markdown("#### Formula Preview")
+                formula = f"XLOOKUP([{lookup_col}], [{lookup_table_name}].[{table_lookup_col}], [{lookup_table_name}].[{table_return_col}], \"{if_not_found}\")"
+                st.code(formula)
+                
+                # Preview of lookup table
+                with st.expander("Preview Lookup Table"):
+                    st.dataframe(lookup_table.head(5), use_container_width=True)
+                
+                # Apply button
+                if st.button("Apply XLOOKUP", key="apply_xlookup"):
+                    # Create a progress bar
+                    progress_bar = st.progress(0)
+                    status_text = st.empty()
+                    
+                    # Update progress
+                    status_text.text("Applying XLOOKUP formula...")
+                    progress_bar.progress(30)
+                    
+                    try:
+                        # Set up parameters
+                        params = {
+                            "lookup_column": lookup_col,
+                            "table_df": lookup_table,
+                            "table_lookup_column": table_lookup_col,
+                            "table_return_column": table_return_col,
+                            "result_column": result_col,
+                            "if_not_found": if_not_found
+                        }
+                        
+                        # Apply formula
+                        result_df = apply_formula_to_column(
+                            st.session_state.cleaned_data,
+                            "XLOOKUP",
+                            params
+                        )
+                        
+                        # Update progress
+                        progress_bar.progress(70)
+                        status_text.text("Processing results...")
+                        
+                        # Update session state
+                        st.session_state.enriched_data = result_df
+                        
+                        # Update progress
+                        progress_bar.progress(100)
+                        status_text.text("XLOOKUP applied successfully!")
+                        
+                        # Clear progress indicators after a delay
+                        time.sleep(0.5)
+                        progress_bar.empty()
+                        status_text.empty()
+                        
+                        # Show results
+                        st.success(f"XLOOKUP formula applied! New column '{result_col}' added to your data.")
+                        
+                        # Preview results
+                        st.markdown("#### Results Preview")
+                        preview_cols = [lookup_col, result_col]
+                        st.dataframe(result_df[preview_cols].head(10), use_container_width=True)
+                    
+                    except Exception as e:
+                        # Update progress
+                        progress_bar.progress(100)
+                        status_text.text("Error applying XLOOKUP!")
+                        
+                        # Clear progress indicators after a delay
+                        time.sleep(0.5)
+                        progress_bar.empty()
+                        status_text.empty()
+                        
+                        st.error(f"Error applying XLOOKUP: {str(e)}")
+                
+        with formula_tabs[2]:  # DAX LOOKUPVALUE
+            st.markdown("#### DAX LOOKUPVALUE Formula")
+            st.markdown("""
+            LOOKUPVALUE is a DAX function from Power BI that returns a value from a table when one or more matches are found.
+            It's more powerful than VLOOKUP because it can search using multiple conditions.
+            """)
+            
+            # Show available columns
+            columns = st.session_state.cleaned_data.columns.tolist()
+            
+            # Get available lookup tables
+            lookup_tables = list(st.session_state.lookup_tables.keys())
+            
+            if not lookup_tables:
+                st.info("You need to upload a lookup table first. Go to the 'Upload Lookup Table' tab to add one.")
+            else:
+                # Select lookup column in main data
+                lookup_col = st.selectbox(
+                    "Select Column with Values to Look Up",
+                    columns,
+                    key="dax_lookup_col"
+                )
+                
+                # Select lookup table
+                lookup_table_name = st.selectbox(
+                    "Select Lookup Table",
+                    lookup_tables,
+                    key="dax_table"
+                )
+                
+                lookup_table = st.session_state.lookup_tables[lookup_table_name]
+                lookup_table_columns = lookup_table.columns.tolist()
+                
+                # Select return column in lookup table
+                table_return_col = st.selectbox(
+                    "Select Column to Return Value From (in Lookup Table)",
+                    lookup_table_columns,
+                    key="dax_table_return_col"
+                )
+                
+                # Select lookup column in lookup table
+                table_lookup_col = st.selectbox(
+                    "Select Column to Search In (in Lookup Table)",
+                    lookup_table_columns,
+                    key="dax_table_lookup_col"
+                )
+                
+                # Optional additional filter
+                add_filter = st.checkbox("Add Additional Filter Condition", key="dax_add_filter")
+                
+                additional_filters = []
+                if add_filter:
+                    # Select filter column in lookup table
+                    filter_col = st.selectbox(
+                        "Select Filter Column (in Lookup Table)",
+                        lookup_table_columns,
+                        key="dax_filter_col"
+                    )
+                    
+                    # Select filter value from unique values
+                    unique_filter_values = lookup_table[filter_col].unique().tolist()
+                    filter_value = st.selectbox(
+                        "Select Filter Value",
+                        unique_filter_values,
+                        key="dax_filter_value"
+                    )
+                    
+                    additional_filters = [filter_col, filter_value]
+                
+                # Name for new column
+                result_col = st.text_input(
+                    "New Column Name",
+                    f"dax_{table_return_col}",
+                    key="dax_result_col"
+                )
+                
+                # Example syntax
+                st.markdown("#### Formula Preview")
+                if additional_filters:
+                    formula = f"LOOKUPVALUE([{table_return_col}], [{table_lookup_col}], [{lookup_col}], [{additional_filters[0]}], \"{additional_filters[1]}\")"
+                else:
+                    formula = f"LOOKUPVALUE([{table_return_col}], [{table_lookup_col}], [{lookup_col}])"
+                st.code(formula)
+                
+                # Preview of lookup table
+                with st.expander("Preview Lookup Table"):
+                    st.dataframe(lookup_table.head(5), use_container_width=True)
+                
+                # Apply button
+                if st.button("Apply DAX LOOKUPVALUE", key="apply_dax"):
+                    # Create a progress bar
+                    progress_bar = st.progress(0)
+                    status_text = st.empty()
+                    
+                    # Update progress
+                    status_text.text("Applying DAX LOOKUPVALUE formula...")
+                    progress_bar.progress(30)
+                    
+                    try:
+                        # Set up parameters
+                        params = {
+                            "lookup_column": lookup_col,
+                            "table_df": lookup_table,
+                            "table_lookup_column": table_lookup_col,
+                            "table_return_column": table_return_col,
+                            "result_column": result_col,
+                            "additional_filters": additional_filters
+                        }
+                        
+                        # Apply formula
+                        result_df = apply_formula_to_column(
+                            st.session_state.cleaned_data,
+                            "DAX_LOOKUPVALUE",
+                            params
+                        )
+                        
+                        # Update progress
+                        progress_bar.progress(70)
+                        status_text.text("Processing results...")
+                        
+                        # Update session state
+                        st.session_state.enriched_data = result_df
+                        
+                        # Update progress
+                        progress_bar.progress(100)
+                        status_text.text("DAX LOOKUPVALUE applied successfully!")
+                        
+                        # Clear progress indicators after a delay
+                        time.sleep(0.5)
+                        progress_bar.empty()
+                        status_text.empty()
+                        
+                        # Show results
+                        st.success(f"DAX LOOKUPVALUE formula applied! New column '{result_col}' added to your data.")
+                        
+                        # Preview results
+                        st.markdown("#### Results Preview")
+                        preview_cols = [lookup_col, result_col]
+                        st.dataframe(result_df[preview_cols].head(10), use_container_width=True)
+                    
+                    except Exception as e:
+                        # Update progress
+                        progress_bar.progress(100)
+                        status_text.text("Error applying DAX LOOKUPVALUE!")
+                        
+                        # Clear progress indicators after a delay
+                        time.sleep(0.5)
+                        progress_bar.empty()
+                        status_text.empty()
+                        
+                        st.error(f"Error applying DAX LOOKUPVALUE: {str(e)}")
+                
+        with formula_tabs[3]:  # Upload Lookup Table
+            st.markdown("#### Upload Lookup Table")
+            st.markdown("""
+            Upload a CSV or Excel file to use as a lookup table for VLOOKUP, XLOOKUP, and DAX formulas.
+            """)
+            
+            # File uploader
+            lookup_file = st.file_uploader(
+                "Upload a CSV or Excel file",
+                type=["csv", "xlsx", "xls"],
+                key="lookup_file_uploader"
+            )
+            
+            if lookup_file:
+                try:
+                    # Determine file type
+                    file_ext = lookup_file.name.split(".")[-1].lower()
+                    
+                    # Read file
+                    if file_ext == "csv":
+                        lookup_df = pd.read_csv(lookup_file)
+                    else:
+                        lookup_df = pd.read_excel(lookup_file)
+                    
+                    # Display table
+                    st.markdown("#### Preview")
+                    st.dataframe(lookup_df.head(5), use_container_width=True)
+                    
+                    # Table info
+                    st.markdown("#### Table Information")
+                    col1, col2, col3 = st.columns(3)
+                    
+                    with col1:
+                        st.metric("Rows", f"{len(lookup_df)}")
+                    
+                    with col2:
+                        st.metric("Columns", f"{len(lookup_df.columns)}")
+                    
+                    with col3:
+                        st.metric("Table Size", f"{lookup_df.memory_usage(deep=True).sum() / 1024:.1f} KB")
+                    
+                    # Name for lookup table
+                    table_name = st.text_input(
+                        "Lookup Table Name",
+                        lookup_file.name.split(".")[0],
+                        key="lookup_table_name"
+                    )
+                    
+                    # Save button
+                    if st.button("Save Lookup Table", key="save_lookup_table"):
+                        # Add to session state
+                        st.session_state.lookup_tables[table_name] = lookup_df
+                        
+                        st.success(f"Lookup table '{table_name}' saved and ready to use with lookup formulas!")
+                        
+                        # Show available tables
+                        st.markdown("#### Available Lookup Tables")
+                        for name, df in st.session_state.lookup_tables.items():
+                            st.markdown(f"- **{name}**: {len(df)} rows, {len(df.columns)} columns")
+                
+                except Exception as e:
+                    st.error(f"Error reading lookup table: {str(e)}")
+            
+            # Show currently available tables
+            if st.session_state.lookup_tables:
+                st.markdown("#### Available Lookup Tables")
+                for name, df in st.session_state.lookup_tables.items():
+                    st.markdown(f"- **{name}**: {len(df)} rows, {len(df.columns)} columns")
+                    
+                # Option to delete a lookup table
+                table_to_delete = st.selectbox(
+                    "Select table to delete",
+                    list(st.session_state.lookup_tables.keys()),
+                    key="delete_lookup_table_selector"
+                )
+                
+                if st.button("Delete Selected Lookup Table", key="delete_lookup_table"):
+                    if table_to_delete in st.session_state.lookup_tables:
+                        del st.session_state.lookup_tables[table_to_delete]
+                        st.success(f"Lookup table '{table_to_delete}' deleted!")
+                        st.rerun()
+        
+        st.markdown('</div>', unsafe_allow_html=True)
