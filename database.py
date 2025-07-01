@@ -8,6 +8,9 @@ import time
 
 # Get database connection from environment variables
 DATABASE_URL = os.environ.get("DATABASE_URL")
+if not DATABASE_URL:
+    # Use a temporary SQLite database file if not set
+    DATABASE_URL = "sqlite:///temp_ai_analytics.db"
 
 # Create SQLAlchemy engine
 engine = create_engine(DATABASE_URL)
@@ -63,10 +66,23 @@ processing_metrics = Table(
     Column('id', Integer, primary_key=True),
     Column('dataset_id', Integer, ForeignKey('saved_datasets.id', ondelete='CASCADE')),
     Column('process_type', String(50), nullable=False),
-    Column('process_details', JSONB),
+    Column('process_details', JSON),
     Column('execution_time', Float),
     Column('created_at', TIMESTAMP, nullable=False, server_default=text('CURRENT_TIMESTAMP'))
 )
+
+user_table = Table(
+    'users',
+    metadata,
+    Column('id', Integer, primary_key=True),
+    Column('username', String(150), unique=True, nullable=False),
+    Column('email', String(255), unique=True, nullable=False),
+    Column('password_hash', String(255), nullable=False),
+    Column('created_at', TIMESTAMP, nullable=False, server_default=text('CURRENT_TIMESTAMP'))
+)
+
+# Automatically create all tables if they do not exist
+metadata.create_all(engine)
 
 # Database function for saving dataset
 def save_dataset(name, description, df, file_name):
@@ -406,3 +422,29 @@ def check_database_connection():
     except Exception as e:
         print(f"Database connection error: {e}")
         return False
+
+def get_user_by_username(username):
+    with engine.connect() as connection:
+        stmt = select(user_table).where(user_table.c.username == username)
+        result = connection.execute(stmt).fetchone()
+        if result:
+            return dict(result._mapping)
+        return None
+
+def get_user_by_email(email):
+    with engine.connect() as connection:
+        stmt = select(user_table).where(user_table.c.email == email)
+        result = connection.execute(stmt).fetchone()
+        if result:
+            return dict(result._mapping)
+        return None
+
+def create_user(username, email, password_hash):
+    with engine.connect() as connection:
+        stmt = insert(user_table).values(
+            username=username,
+            email=email,
+            password_hash=password_hash
+        )
+        connection.execute(stmt)
+        connection.commit()
