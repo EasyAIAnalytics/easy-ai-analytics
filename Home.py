@@ -503,10 +503,6 @@ def main():
                 
                 fig = visualizer.plot_missing_values()
                 st.plotly_chart(fig, use_container_width=True)
-                img_bytes = fig.to_image(format="png")
-                st.download_button("Download as PNG", data=img_bytes, file_name="missing_values_heatmap.png", mime="image/png")
-                img_bytes_jpg = fig.to_image(format="jpg")
-                st.download_button("Download as JPG", data=img_bytes_jpg, file_name="missing_values_heatmap.jpg", mime="image/jpeg")
             
             elif viz_type == "Distribution Analysis":
                 st.markdown("#### Distribution Analysis")
@@ -529,24 +525,6 @@ def main():
                         
                         fig = visualizer.plot_numeric_distribution(selected_col)
                         st.plotly_chart(fig, use_container_width=True)
-                        img_bytes = fig.to_image(format="png")
-                        st.download_button("Download as PNG", data=img_bytes, file_name="numeric_distribution.png", mime="image/png")
-                        img_bytes_jpg = fig.to_image(format="jpg")
-                        st.download_button("Download as JPG", data=img_bytes_jpg, file_name="numeric_distribution.jpg", mime="image/jpeg")
-                        
-                        # Show statistics
-                        stats = st.session_state.data[selected_col].describe()
-                        
-                        col1, col2, col3, col4 = st.columns(4)
-                        
-                        with col1:
-                            st.metric("Mean", f"{stats['mean']:.2f}")
-                        with col2:
-                            st.metric("Median", f"{stats['50%']:.2f}")
-                        with col3:
-                            st.metric("Min", f"{stats['min']:.2f}")
-                        with col4:
-                            st.metric("Max", f"{stats['max']:.2f}")
                     else:
                         st.warning("No numeric columns found in the dataset")
                 
@@ -561,16 +539,6 @@ def main():
                         
                         fig = visualizer.plot_categorical_distribution(selected_col)
                         st.plotly_chart(fig, use_container_width=True)
-                        img_bytes = fig.to_image(format="png")
-                        st.download_button("Download as PNG", data=img_bytes, file_name="categorical_distribution.png", mime="image/png")
-                        img_bytes_jpg = fig.to_image(format="jpg")
-                        st.download_button("Download as JPG", data=img_bytes_jpg, file_name="categorical_distribution.jpg", mime="image/jpeg")
-                        
-                        # Show value counts
-                        value_counts = st.session_state.data[selected_col].value_counts()
-                        
-                        st.markdown("#### Value Counts")
-                        st.dataframe(value_counts.reset_index().rename(columns={"index": selected_col, selected_col: "Count"}))
                     else:
                         st.warning("No categorical columns found in the dataset")
             
@@ -597,17 +565,9 @@ def main():
                         else:
                             fig = visualizer.plot_correlation_matrix()
                             st.plotly_chart(fig, use_container_width=True)
-                            img_bytes = fig.to_image(format="png")
-                            st.download_button("Download as PNG", data=img_bytes, file_name="correlation_matrix.png", mime="image/png")
-                            img_bytes_jpg = fig.to_image(format="jpg")
-                            st.download_button("Download as JPG", data=img_bytes_jpg, file_name="correlation_matrix.jpg", mime="image/jpeg")
                     else:
                         fig = visualizer.plot_correlation_matrix()
                         st.plotly_chart(fig, use_container_width=True)
-                        img_bytes = fig.to_image(format="png")
-                        st.download_button("Download as PNG", data=img_bytes, file_name="correlation_matrix.png", mime="image/png")
-                        img_bytes_jpg = fig.to_image(format="jpg")
-                        st.download_button("Download as JPG", data=img_bytes_jpg, file_name="correlation_matrix.jpg", mime="image/jpeg")
                 else:
                     st.warning("Correlation matrix requires at least 2 numeric columns")
             
@@ -648,10 +608,6 @@ def main():
                     
                     fig = visualizer.plot_scatter(x_col, y_col, color_col)
                     st.plotly_chart(fig, use_container_width=True)
-                    img_bytes = fig.to_image(format="png")
-                    st.download_button("Download as PNG", data=img_bytes, file_name="scatter_plot.png", mime="image/png")
-                    img_bytes_jpg = fig.to_image(format="jpg")
-                    st.download_button("Download as JPG", data=img_bytes_jpg, file_name="scatter_plot.jpg", mime="image/jpeg")
                     
                     # Add trendline option
                     if st.checkbox("Add trendline", value=False):
@@ -663,10 +619,6 @@ def main():
                             trendline="ols"
                         )
                         st.plotly_chart(fig, use_container_width=True)
-                        img_bytes = fig.to_image(format="png")
-                        st.download_button("Download as PNG", data=img_bytes, file_name="trendline.png", mime="image/png")
-                        img_bytes_jpg = fig.to_image(format="jpg")
-                        st.download_button("Download as JPG", data=img_bytes_jpg, file_name="trendline.jpg", mime="image/jpeg")
                         
                         # Calculate and show correlation
                         correlation = st.session_state.data[[x_col, y_col]].corr().iloc[0, 1]
@@ -752,10 +704,6 @@ def main():
                                     fig.update_traces(mode="lines+markers")
                                 
                                 st.plotly_chart(fig, use_container_width=True)
-                                img_bytes = fig.to_image(format="png")
-                                st.download_button("Download as PNG", data=img_bytes, file_name="line_chart.png", mime="image/png")
-                                img_bytes_jpg = fig.to_image(format="jpg")
-                                st.download_button("Download as JPG", data=img_bytes_jpg, file_name="line_chart.jpg", mime="image/jpeg")
                             except Exception as e:
                                 st.error(f"Error creating line chart: {e}")
                         else:
@@ -861,10 +809,6 @@ def main():
                             
                             fig.update_layout(font=dict(family="Arial, sans-serif", size=16), legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1), margin=dict(l=40, r=40, t=60, b=40))
                             st.plotly_chart(fig, use_container_width=True)
-                            img_bytes = fig.to_image(format="png")
-                            st.download_button("Download as PNG", data=img_bytes, file_name="bar_chart.png", mime="image/png")
-                            img_bytes_jpg = fig.to_image(format="jpg")
-                            st.download_button("Download as JPG", data=img_bytes_jpg, file_name="bar_chart.jpg", mime="image/jpeg")
                         except Exception as e:
                             st.error(f"Error creating bar chart: {e}")
                     else:
@@ -928,10 +872,6 @@ def main():
                             
                             fig.update_layout(font=dict(family="Arial, sans-serif", size=16), legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1), margin=dict(l=40, r=40, t=60, b=40))
                             st.plotly_chart(fig, use_container_width=True)
-                            img_bytes = fig.to_image(format="png")
-                            st.download_button("Download as PNG", data=img_bytes, file_name="pie_chart.png", mime="image/png")
-                            img_bytes_jpg = fig.to_image(format="jpg")
-                            st.download_button("Download as JPG", data=img_bytes_jpg, file_name="pie_chart.jpg", mime="image/jpeg")
                         except Exception as e:
                             st.error(f"Error creating pie chart: {e}")
                     else:
@@ -991,20 +931,6 @@ def main():
                             
                             fig.update_layout(font=dict(family="Arial, sans-serif", size=16), legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1), margin=dict(l=40, r=40, t=60, b=40))
                             st.plotly_chart(fig, use_container_width=True)
-                            img_bytes = fig.to_image(format="png")
-                            st.download_button("Download as PNG", data=img_bytes, file_name="box_plot.png", mime="image/png")
-                            img_bytes_jpg = fig.to_image(format="jpg")
-                            st.download_button("Download as JPG", data=img_bytes_jpg, file_name="box_plot.jpg", mime="image/jpeg")
-                            
-                            # Show statistics
-                            st.markdown("#### Summary Statistics")
-                            
-                            if use_category and x_col:
-                                stats = st.session_state.data.groupby(x_col)[y_col].describe().reset_index()
-                            else:
-                                stats = st.session_state.data[y_col].describe().to_frame().T
-                                
-                            st.dataframe(stats, use_container_width=True)
                         except Exception as e:
                             st.error(f"Error creating box plot: {e}")
                 else:
@@ -1102,28 +1028,6 @@ def main():
                         
                         fig.update_layout(font=dict(family="Arial, sans-serif", size=16), legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1), margin=dict(l=40, r=40, t=60, b=40))
                         st.plotly_chart(fig, use_container_width=True)
-                        img_bytes = fig.to_image(format="png")
-                        st.download_button("Download as PNG", data=img_bytes, file_name="histogram.png", mime="image/png")
-                        img_bytes_jpg = fig.to_image(format="jpg")
-                        st.download_button("Download as JPG", data=img_bytes_jpg, file_name="histogram.jpg", mime="image/jpeg")
-                        
-                        # Show statistics
-                        st.markdown("#### Summary Statistics")
-                        
-                        stats = st.session_state.data[col].describe()
-                        
-                        col1, col2, col3, col4 = st.columns(4)
-                        
-                        with col1:
-                            st.metric("Mean", f"{stats['mean']:.2f}")
-                        with col2:
-                            st.metric("Median", f"{stats['50%']:.2f}")
-                        with col3:
-                            st.metric("Std Dev", f"{stats['std']:.2f}")
-                        with col4:
-                            # Calculate skewness
-                            skewness = st.session_state.data[col].skew()
-                            st.metric("Skewness", f"{skewness:.2f}")
                     except Exception as e:
                         st.error(f"Error creating histogram: {e}")
                 else:
