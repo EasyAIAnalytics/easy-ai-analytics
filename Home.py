@@ -16,8 +16,6 @@ from bs4 import BeautifulSoup
 import streamlit.components.v1 as components
 import bcrypt
 from fpdf import FPDF
-import cairosvg
-import tempfile
 
 # Set a global Plotly template and colorway
 pio.templates.default = "plotly_white"
@@ -147,47 +145,6 @@ def show_login_signup():
                 st.session_state["signup_error"] = ""
                 st.session_state["signup_success"] = ""
                 st.rerun()
-
-def generate_pdf(company, project, objectives, overview, insights, chart_svg_bytes):
-    # Convert SVG to PNG for PDF embedding
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_png:
-        cairosvg.svg2png(bytestring=chart_svg_bytes, write_to=tmp_png.name)
-        chart_png_path = tmp_png.name
-
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", 'B', 20)
-    pdf.cell(0, 15, "EASY AI ANALYTICS", ln=True, align="C")
-    pdf.ln(5)
-    pdf.set_font("Arial", '', 12)
-    pdf.cell(0, 10, f"Company Name: {company}", ln=True)
-    pdf.cell(0, 10, f"Project: {project}", ln=True)
-    pdf.ln(5)
-    pdf.set_font("Arial", 'B', 14)
-    pdf.cell(0, 10, "Business Objectives", ln=True)
-    pdf.set_font("Arial", '', 12)
-    pdf.multi_cell(0, 8, objectives)
-    pdf.ln(2)
-    pdf.set_font("Arial", 'B', 14)
-    pdf.cell(0, 10, "Dataset Overview", ln=True)
-    pdf.set_font("Arial", '', 12)
-    pdf.multi_cell(0, 8, overview)
-    pdf.ln(2)
-    pdf.set_font("Arial", 'B', 14)
-    pdf.cell(0, 10, "Data Visualizations", ln=True)
-    pdf.ln(2)
-    # Insert chart image
-    pdf.image(chart_png_path, w=pdf.epw)
-    pdf.ln(2)
-    pdf.set_font("Arial", 'B', 14)
-    pdf.cell(0, 10, "Data Insights", ln=True)
-    pdf.set_font("Arial", '', 12)
-    pdf.multi_cell(0, 8, insights)
-    # Clean up temp file
-    os.remove(chart_png_path)
-    # Output PDF to bytes
-    pdf_bytes = pdf.output(dest='S')
-    return pdf_bytes
 
 def main():
     # Show login page if not logged in
@@ -1152,7 +1109,7 @@ def main():
                     else:
                         continue
                     fig.update_layout(font=dict(family="Arial, sans-serif", size=16), legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1), margin=dict(l=40, r=40, t=60, b=40))
-                    img_bytes = fig.to_image(format="svg", engine="json")
+                    img_bytes = fig.to_image(format="png")
                     chart_images.append((chart, img_bytes))
                 # Generate PDF report
                 form_data = {
