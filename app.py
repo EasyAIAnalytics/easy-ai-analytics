@@ -78,8 +78,7 @@ def show_signup():
     st.markdown("<p style='text-align:center;'>Already have an account? <a href='?page=login'>Login</a></p>", unsafe_allow_html=True)
 
 # --- Main App Router ---
-query_params = st.experimental_get_query_params()
-page = query_params.get("page", ["home"])[0].lower()
+page = st.query_params.get("page", ["home"])[0].lower()
 
 if "user_id" not in st.session_state:
     if page == "signup":
