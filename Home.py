@@ -1152,7 +1152,7 @@ def main():
                     else:
                         continue
                     fig.update_layout(font=dict(family="Arial, sans-serif", size=16), legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1), margin=dict(l=40, r=40, t=60, b=40))
-                    img_bytes = fig.to_image(format="png")
+                    img_bytes = fig.to_image(format="svg", engine="json")
                     chart_images.append((chart, img_bytes))
                 # Generate PDF report
                 form_data = {
