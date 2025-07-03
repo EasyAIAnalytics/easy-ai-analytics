@@ -472,112 +472,90 @@ def main():
             st.markdown("</div>", unsafe_allow_html=True)
 
     # Tab 2: Visualize
-    with tab2:
-        if st.session_state.data is not None:
-            # Initialize Visualizer
-            visualizer = Visualizer(st.session_state.data)
+with tab2:
+    if st.session_state.data is not None:
+        # Initialize Visualizer
+        visualizer = Visualizer(st.session_state.data)
+        
+        st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
+        st.markdown("### Data Visualization")
+        st.markdown("Select visualization type and configure chart parameters")
+        
+        viz_type = st.selectbox(
+            "Select Visualization Type",
+            options=[
+                "Missing Values Heatmap",
+                "Distribution Analysis",
+                "Correlation Matrix",
+                "Scatter Plot",
+                "Line Chart",
+                "Bar Chart",
+                "Pie Chart",
+                "Box Plot",
+                "Histogram"
+            ]
+        )
+        
+        if viz_type == "Missing Values Heatmap":
+            st.markdown("#### Missing Values Heatmap")
+            st.markdown("Visualize the pattern of missing values in your dataset")
             
-            st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
-            st.markdown("### Data Visualization")
-            st.markdown("Select visualization type and configure chart parameters")
+            fig = visualizer.plot_missing_values()
+            st.plotly_chart(fig, use_container_width=True)
+            st.info("Image download disabled to avoid Kaleido error on hosting platform.")
+        
+        elif viz_type == "Distribution Analysis":
+            st.markdown("#### Distribution Analysis")
             
-            # Create sections for different visualization types
-            viz_type = st.selectbox(
-                "Select Visualization Type",
-                options=[
-                    "Missing Values Heatmap",
-                    "Distribution Analysis",
-                    "Correlation Matrix",
-                    "Scatter Plot",
-                    "Line Chart",
-                    "Bar Chart",
-                    "Pie Chart",
-                    "Box Plot",
-                    "Histogram"
-                ]
+            column_type = st.radio(
+                "Select column type",
+                options=["Numeric", "Categorical"],
+                horizontal=True
             )
             
-            if viz_type == "Missing Values Heatmap":
-                st.markdown("#### Missing Values Heatmap")
-                st.markdown("Visualize the pattern of missing values in your dataset")
+            if column_type == "Numeric":
+                numeric_cols = st.session_state.data.select_dtypes(include=['number']).columns.tolist()
                 
-                fig = visualizer.plot_missing_values()
-                st.plotly_chart(fig, use_container_width=True)
-                img_bytes = fig.to_image(format="png")
-                st.download_button("Download as PNG", data=img_bytes, file_name="missing_values_heatmap.png", mime="image/png")
-                img_bytes_jpg = fig.to_image(format="jpg")
-                st.download_button("Download as JPG", data=img_bytes_jpg, file_name="missing_values_heatmap.jpg", mime="image/jpeg")
+                if numeric_cols:
+                    selected_col = st.selectbox("Select numeric column", options=numeric_cols)
+                    fig = visualizer.plot_numeric_distribution(selected_col)
+                    st.plotly_chart(fig, use_container_width=True)
+                    st.info("Image download disabled to avoid Kaleido error on hosting platform.")
+
+                    stats = st.session_state.data[selected_col].describe()
+                    col1, col2, col3, col4 = st.columns(4)
+                    with col1:
+                        st.metric("Mean", f"{stats['mean']:.2f}")
+                    with col2:
+                        st.metric("Median", f"{stats['50%']:.2f}")
+                    with col3:
+                        st.metric("Min", f"{stats['min']:.2f}")
+                    with col4:
+                        st.metric("Max", f"{stats['max']:.2f}")
+                else:
+                    st.warning("No numeric columns found in the dataset")
             
-            elif viz_type == "Distribution Analysis":
-                st.markdown("#### Distribution Analysis")
+            else:  # Categorical
+                categorical_cols = st.session_state.data.select_dtypes(exclude=['number']).columns.tolist()
                 
-                # Select column type
-                column_type = st.radio(
-                    "Select column type",
-                    options=["Numeric", "Categorical"],
-                    horizontal=True
-                )
-                
-                if column_type == "Numeric":
-                    numeric_cols = st.session_state.data.select_dtypes(include=['number']).columns.tolist()
-                    
-                    if numeric_cols:
-                        selected_col = st.selectbox(
-                            "Select numeric column",
-                            options=numeric_cols
-                        )
-                        
-                        fig = visualizer.plot_numeric_distribution(selected_col)
-                        st.plotly_chart(fig, use_container_width=True)
-                        img_bytes = fig.to_image(format="png")
-                        st.download_button("Download as PNG", data=img_bytes, file_name="numeric_distribution.png", mime="image/png")
-                        img_bytes_jpg = fig.to_image(format="jpg")
-                        st.download_button("Download as JPG", data=img_bytes_jpg, file_name="numeric_distribution.jpg", mime="image/jpeg")
-                        
-                        # Show statistics
-                        stats = st.session_state.data[selected_col].describe()
-                        
-                        col1, col2, col3, col4 = st.columns(4)
-                        
-                        with col1:
-                            st.metric("Mean", f"{stats['mean']:.2f}")
-                        with col2:
-                            st.metric("Median", f"{stats['50%']:.2f}")
-                        with col3:
-                            st.metric("Min", f"{stats['min']:.2f}")
-                        with col4:
-                            st.metric("Max", f"{stats['max']:.2f}")
-                    else:
-                        st.warning("No numeric columns found in the dataset")
-                
-                else:  # Categorical
-                    categorical_cols = st.session_state.data.select_dtypes(exclude=['number']).columns.tolist()
-                    
-                    if categorical_cols:
-                        selected_col = st.selectbox(
-                            "Select categorical column",
-                            options=categorical_cols
-                        )
-                        
-                        fig = visualizer.plot_categorical_distribution(selected_col)
-                        st.plotly_chart(fig, use_container_width=True)
-                        img_bytes = fig.to_image(format="png")
-                        st.download_button("Download as PNG", data=img_bytes, file_name="categorical_distribution.png", mime="image/png")
-                        img_bytes_jpg = fig.to_image(format="jpg")
-                        st.download_button("Download as JPG", data=img_bytes_jpg, file_name="categorical_distribution.jpg", mime="image/jpeg")
-                        
-                        # Show value counts
-                        value_counts = st.session_state.data[selected_col].value_counts()
-                        
-                        st.markdown("#### Value Counts")
-                        st.dataframe(value_counts.reset_index().rename(columns={"index": selected_col, selected_col: "Count"}))
-                    else:
-                        st.warning("No categorical columns found in the dataset")
-            
-            elif viz_type == "Correlation Matrix":
-                st.markdown("#### Correlation Matrix")
-                st.markdown("Analyze the relationships between numeric variables")
-                
+                if categorical_cols:
+                    selected_col = st.selectbox("Select categorical column", options=categorical_cols)
+                    fig = visualizer.plot_categorical_distribution(selected_col)
+                    st.plotly_chart(fig, use_container_width=True)
+                    st.info("Image download disabled to avoid Kaleido error on hosting platform.")
+
+                    value_counts = st.session_state.data[selected_col].value_counts()
+                    st.markdown("#### Value Counts")
+                    st.dataframe(value_counts.reset_index().rename(columns={"index": selected_col, selected_col: "Count"}))
+                else:
+                    st.warning("No categorical columns found in the dataset")
+        
+        elif viz_type == "Correlation Matrix":
+            st.markdown("#### Correlation Matrix")
+            st.markdown("Analyze the relationships between numeric variables")
+            fig = visualizer.plot_correlation_matrix()
+            st.plotly_chart(fig, use_container_width=True)
+            st.info("Image download disabled to avoid Kaleido error on hosting platform.")
                 # Get numeric columns
                 numeric_cols = st.session_state.data.select_dtypes(include=['number']).columns.tolist()
                 
