@@ -12,10 +12,19 @@ PAGES = {
     "Advanced Formulas": "pages.Advanced_Formulas",
 }
 
-# --- MAIN ROUTER ---
-# Directly load Home page (or implement your own routing logic here)
-module = importlib.import_module("Home")
-if hasattr(module, "main"):
-    module.main()
-else:
-    st.error("This page does not have a main() function.") 
+# --- Sidebar Navigation ---
+st.sidebar.title("Easy AI Analytics")
+selection = st.sidebar.radio("Go to", list(PAGES.keys()))
+
+# --- Main Routing Logic ---
+selected_module = PAGES[selection]
+try:
+    module = importlib.import_module(selected_module)
+    if hasattr(module, "main"):
+        module.main()
+    else:
+        st.error(f"The `{selection}` page does not have a `main()` function.")
+except ModuleNotFoundError:
+    st.error(f"The module `{selected_module}` could not be found.")
+except Exception as e:
+    st.error(f"An error occurred while loading `{selection}`: {e}")
