@@ -10,7 +10,6 @@ PAGES = {
     "Advanced Statistics": "pages.Advanced_Statistics",
     "AI Analytics": "pages.AI_Analytics",
     "Business Features": "pages.Business_Features",
-    "Database Management": "pages.Database_Management",
     "Advanced Formulas": "pages.Advanced_Formulas",
 }
 
