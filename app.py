@@ -13,8 +13,8 @@ RAW_PAGES = {
     "Advanced Statistics": "pages.Advanced_Statistics",
     "AI Analytics": "pages.AI_Analytics",
     "Business Features": "pages.Business_Features",
-    "Database Management": "pages.Database_Management",  # Will be filtered if not present
     "Advanced Formulas": "pages.Advanced_Formulas",
+    # Removed: "Database Management"
 }
 
 # Only include pages that physically exist
@@ -31,6 +31,7 @@ def show_logout():
         if st.button("Logout", key="logout_btn"):
             for k in list(st.session_state.keys()):
                 del st.session_state[k]
+            st.query_params.clear()
             st.rerun()
 
 # --- Login UI ---
@@ -46,6 +47,7 @@ def show_login():
         if user and bcrypt.checkpw(password.encode(), user["password_hash"].encode()):
             st.session_state.user_id = user["id"]
             st.session_state.username = user["username"]
+            st.query_params.update({"page": "home"})
             st.success(f"Welcome back, {user['username']}!")
             st.rerun()
         else:
@@ -72,6 +74,7 @@ def show_signup():
             hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
             db.create_user(username, email, hashed)
             st.success("Account created! Please log in.")
+            st.query_params.update({"page": "login"})
             st.rerun()
     if error:
         st.error(error)
