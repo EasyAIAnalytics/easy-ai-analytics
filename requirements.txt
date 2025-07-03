@@ -9,7 +9,6 @@ openpyxl
 xlsxwriter
 matplotlib
 scipy
-statsmodels
 jinja2
 python-docx
 reportlab
@@ -26,3 +25,5 @@ docxtpl
 plotly
 kaleido
 bs4
+scipy==1.10.1
+statsmodels==0.13.5
