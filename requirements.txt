@@ -28,5 +28,5 @@ bs4
 scipy
 statsmodels
 beautifulsoup4
-fpdf
 cairosvg
+fpdf==1.7.2
