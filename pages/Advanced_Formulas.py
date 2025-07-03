@@ -189,11 +189,12 @@ def apply_formula_to_column(df, formula_type, params):
     return result_df
 
 # Initialize session state
-if "data" not in st.session_state:
-    st.session_state.data = None
-    
-if "cleaned_data" not in st.session_state:
-    st.session_state.cleaned_data = None
+if 'data' not in st.session_state or st.session_state.data is None:
+    st.warning("Please upload data in the main dashboard before using this feature.")
+    st.stop()
+
+if 'cleaned_data' not in st.session_state:
+    st.session_state.cleaned_data = st.session_state.data.copy()
 
 if "enriched_data" not in st.session_state:
     st.session_state.enriched_data = None

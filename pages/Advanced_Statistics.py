@@ -33,7 +33,7 @@ st.markdown('<p class="sub-header">Powerful statistical tools to validate assump
 
 # Initialize session state variables if they don't exist
 if 'data' not in st.session_state or st.session_state.data is None:
-    st.warning("Please upload data in the main dashboard before using this page.")
+    st.warning("Please upload data in the main dashboard before using this feature.")
     st.stop()
 
 if 'cleaned_data' not in st.session_state:
@@ -314,7 +314,7 @@ with tab1:
                                 
                                 # Calculate effect size (Eta-squared)
                                 # Handle column names with spaces by quoting them with Q()
-                                formula = f"Q('{value_column}') ~ C(Q('{group_column}'))"
+                                formula = f'Q("{value_column}") ~ C(Q("{group_column}"))'
                                 model = ols(formula, data=test_data).fit()
                                 anova_table = sm.stats.anova_lm(model, typ=2)
                                 

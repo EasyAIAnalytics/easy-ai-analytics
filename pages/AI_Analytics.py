@@ -43,7 +43,7 @@ elif ANTHROPIC_API_KEY:
 
 # Initialize session state variables if they don't exist
 if 'data' not in st.session_state or st.session_state.data is None:
-    st.warning("Please upload data in the main dashboard before using AI analytics.")
+    st.warning("Please upload data in the main dashboard before using this feature.")
     st.stop()
 
 if 'cleaned_data' not in st.session_state:

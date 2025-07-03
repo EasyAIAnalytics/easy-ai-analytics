@@ -8,7 +8,6 @@ page_files = [
     "pages/Advanced_Statistics.py",
     "pages/Business_Features.py",
     "pages/Data_Enrichment.py",
-    "pages/Database_Management.py",
 ]
 
 # Session state initialization code to add if not present
