@@ -19,6 +19,12 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+with st.sidebar:
+    if st.button("Logout", key="logout_btn_business_features"):
+        for k in list(st.session_state.keys()):
+            del st.session_state[k]
+        st.rerun()
+
 # Page title with styling
 st.markdown('<h1 class="main-header">Business Intelligence Features</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-header">Advanced tools for business analysis, KPI tracking, and financial modeling</p>', unsafe_allow_html=True)

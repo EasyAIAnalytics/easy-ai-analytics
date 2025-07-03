@@ -20,6 +20,12 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+with st.sidebar:
+    if st.button("Logout", key="logout_btn"):
+        for k in list(st.session_state.keys()):
+            del st.session_state[k]
+        st.rerun()
+
 # Page title with styling
 st.markdown('<h1 class="main-header">AI-Powered Analytics</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-header">Harness the power of artificial intelligence to uncover deeper insights from your data</p>', unsafe_allow_html=True)

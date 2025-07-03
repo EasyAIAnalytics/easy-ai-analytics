@@ -151,9 +151,8 @@ def main():
         show_login_signup()
         st.stop()
 
-    # Add logout button to all pages
-    col1, col2 = st.columns([8, 1])
-    with col2:
+    # Add logout button to the sidebar after login
+    with st.sidebar:
         if st.button("Logout", key="logout_btn"):
             for k in list(st.session_state.keys()):
                 del st.session_state[k]

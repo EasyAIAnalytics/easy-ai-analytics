@@ -736,3 +736,9 @@ else:
                 st.rerun()
     
     st.markdown("</div>", unsafe_allow_html=True)
+
+with st.sidebar:
+    if st.button("Logout", key="logout_btn"):
+        for k in list(st.session_state.keys()):
+            del st.session_state[k]
+        st.rerun()

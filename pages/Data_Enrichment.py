@@ -16,6 +16,7 @@ import requests
 from io import StringIO
 from urllib.parse import urlparse
 
+        
 # Page configuration
 st.set_page_config(
     page_title="Data Enrichment",
@@ -3076,3 +3077,9 @@ else:
                     st.info("Enriched data has been discarded")
         
         st.markdown('</div>', unsafe_allow_html=True)
+
+    with st.sidebar:
+        if st.button("Logout", key="logout_btn_data_enrichment"):
+            for k in list(st.session_state.keys()):
+                del st.session_state[k]
+            st.rerun()

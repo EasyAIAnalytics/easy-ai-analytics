@@ -15,6 +15,10 @@ from io import BytesIO
 import time
 import traceback
 
+
+
+
+        
 # Page configuration
 st.set_page_config(
     page_title="Advanced Statistical Analysis",
@@ -1889,3 +1893,9 @@ with tab3:
                                     st.error(f"Error during Bayesian A/B testing: {str(e)}")
                                     st.error(traceback.format_exc())
     st.markdown('</div>', unsafe_allow_html=True)
+
+with st.sidebar:
+    if st.button("Logout", key="logout_btn_advanced_statistics"):
+        for k in list(st.session_state.keys()):
+            del st.session_state[k]
+        st.rerun()
