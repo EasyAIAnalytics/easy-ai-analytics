@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login / Signup</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #636EFA 0%, #AB63FA 100%);
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Montserrat', Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.5s;
+    }
+    .form-container {
+      width: 350px;
+      border-radius: 1.5rem;
+      background: rgba(17, 24, 39, 0.98);
+      padding: 2.5rem 2rem 2rem 2rem;
+      color: #F3F4F6;
+      box-shadow: 0 8px 32px 0 rgba(99,110,234,0.25);
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn 1s cubic-bezier(.39,.575,.56,1.000);
+    }
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(40px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .toggle {
+      position: absolute;
+      top: 1.2rem;
+      right: 1.5rem;
+      background: none;
+      border: none;
+      color: #A78BFA;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: color 0.2s;
+    }
+    .toggle:hover {
+      color: #fff;
+      text-decoration: underline;
+    }
+    .title {
+      text-align: center;
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      letter-spacing: 1px;
+      color: #A78BFA;
+      text-shadow: 0 2px 8px rgba(99,110,234,0.15);
+    }
+    .subtitle {
+      text-align: center;
+      font-size: 1rem;
+      color: #B3B3B3;
+      margin-bottom: 1.5rem;
+    }
+    .form {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      animation: fadeIn 1.2s 0.2s backwards;
+    }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      position: relative;
+    }
+    .input-group label {
+      color: #A7A7A7;
+      font-size: 0.95rem;
+      margin-bottom: 2px;
+      font-weight: 500;
+    }
+    .input-group input {
+      width: 100%;
+      border-radius: 0.5rem;
+      border: 1.5px solid #393E5B;
+      outline: 0;
+      background: #23263A;
+      padding: 0.85rem 1rem;
+      color: #F3F4F6;
+      font-size: 1rem;
+      transition: border 0.3s, box-shadow 0.3s;
+      box-shadow: 0 2px 8px 0 rgba(99,110,234,0.05);
+    }
+    .input-group input:focus {
+      border-color: #A78BFA;
+      box-shadow: 0 0 0 2px #A78BFA33;
+      background: #23263A;
+      animation: inputFocus 0.3s;
+    }
+    @keyframes inputFocus {
+      0% { box-shadow: 0 0 0 0 #A78BFA33; }
+      100% { box-shadow: 0 0 0 2px #A78BFA33; }
+    }
+    .forgot {
+      display: flex;
+      justify-content: flex-end;
+      font-size: 0.85rem;
+      color: #A7A7A7;
+      margin: 4px 0 0 0;
+    }
+    .forgot a {
+      color: #A78BFA;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .forgot a:hover {
+      color: #fff;
+      text-decoration: underline;
+    }
+    .sign {
+      width: 100%;
+      background: linear-gradient(90deg, #636EFA 0%, #A78BFA 100%);
+      padding: 0.85rem;
+      text-align: center;
+      color: #fff;
+      border: none;
+      border-radius: 0.5rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      box-shadow: 0 2px 8px 0 rgba(99,110,234,0.10);
+      transition: background 0.2s, transform 0.1s;
+      letter-spacing: 0.5px;
+    }
+    .sign:hover {
+      background: linear-gradient(90deg, #A78BFA 0%, #636EFA 100%);
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 4px 16px 0 rgba(99,110,234,0.18);
+    }
+    .social-message {
+      display: flex;
+      align-items: center;
+      padding-top: 1.2rem;
+      gap: 0.5rem;
+    }
+    .line {
+      height: 1px;
+      flex: 1 1 0%;
+      background: #393E5B;
+    }
+    .social-message .message {
+      padding: 0 0.75rem;
+      font-size: 0.95rem;
+      color: #A7A7A7;
+    }
+    .social-icons {
+      display: flex;
+      justify-content: center;
+      margin-top: 1rem;
+      gap: 0.5rem;
+    }
+    .social-icons .icon {
+      border-radius: 0.25rem;
+      padding: 0.7rem;
+      border: none;
+      background: #23263A;
+      margin-left: 0;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      box-shadow: 0 2px 8px 0 rgba(99,110,234,0.08);
+    }
+    .social-icons .icon:hover {
+      background: #636EFA;
+      transform: scale(1.08);
+    }
+    .social-icons .icon svg {
+      height: 1.25rem;
+      width: 1.25rem;
+      fill: #fff;
+      transition: fill 0.2s;
+    }
+    .signup {
+      text-align: center;
+      font-size: 0.95rem;
+      color: #A7A7A7;
+      margin-top: 1.5rem;
+    }
+    .signup a {
+      color: #A78BFA;
+      text-decoration: none;
+      font-weight: 700;
+      transition: color 0.2s;
+    }
+    .signup a:hover {
+      color: #fff;
+      text-decoration: underline;
+    }
+    .fade-in {
+      animation: fadeIn 0.8s cubic-bezier(.39,.575,.56,1.000);
+    }
+    .slide-in {
+      animation: slideIn 0.7s cubic-bezier(.39,.575,.56,1.000);
+    }
+    @keyframes slideIn {
+      0% { opacity: 0; transform: translateX(40px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+  </style>
+  <script>
+    function toggleForm() {
+      var login = document.getElementById('login-form');
+      var signup = document.getElementById('signup-form');
+      if (login.style.display !== 'none') {
+        login.style.display = 'none';
+        signup.style.display = 'block';
+      } else {
+        login.style.display = 'block';
+        signup.style.display = 'none';
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="form-container fade-in">
+    <button class="toggle" onclick="toggleForm()">Switch</button>
+    <div id="login-form" style="display:block;">
+      <p class="title">Login</p>
+      <p class="subtitle">Welcome back! Please login to your account.</p>
+      <form class="form slide-in">
+        <div class="input-group">
+          <label for="username">Username</label>
+          <input type="text" name="username" id="username" placeholder="">
+        </div>
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input type="password" name="password" id="password" placeholder="">
+          <div class="forgot">
+            <a rel="noopener noreferrer" href="#">Forgot Password?</a>
+          </div>
+        </div>
+        <button class="sign" type="submit">Sign in</button>
+      </form>
+      <div class="social-message">
+        <div class="line"></div>
+        <p class="message">Login with social accounts</p>
+        <div class="line"></div>
+      </div>
+      <div class="social-icons">
+        <button aria-label="Log in with Google" class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+            <path d="M16.318 13.714v5.484h9.078c-0.37 2.354-2.745 6.901-9.078 6.901-5.458 0-9.917-4.521-9.917-10.099s4.458-10.099 9.917-10.099c3.109 0 5.193 1.318 6.38 2.464l4.339-4.182c-2.786-2.599-6.396-4.182-10.719-4.182-8.844 0-16 7.151-16 16s7.156 16 16 16c9.234 0 15.365-6.49 15.365-15.635 0-1.052-0.115-1.854-0.255-2.651z"></path>
+          </svg>
+        </button>
+        <button aria-label="Log in with Twitter" class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+            <path d="M31.937 6.093c-1.177 0.516-2.437 0.871-3.765 1.032 1.355-0.813 2.391-2.099 2.885-3.631-1.271 0.74-2.677 1.276-4.172 1.579-1.192-1.276-2.896-2.079-4.787-2.079-3.625 0-6.563 2.937-6.563 6.557 0 0.521 0.063 1.021 0.172 1.495-5.453-0.255-10.287-2.875-13.52-6.833-0.568 0.964-0.891 2.084-0.891 3.303 0 2.281 1.161 4.281 2.916 5.457-1.073-0.031-2.083-0.328-2.968-0.817v0.079c0 3.181 2.26 5.833 5.26 6.437-0.547 0.145-1.131 0.229-1.724 0.229-0.421 0-0.823-0.041-1.224-0.115 0.844 2.604 3.26 4.5 6.14 4.557-2.239 1.755-5.077 2.801-8.135 2.801-0.521 0-1.041-0.025-1.563-0.088 2.917 1.86 6.36 2.948 10.079 2.948 12.067 0 18.661-9.995 18.661-18.651 0-0.276 0-0.557-0.021-0.839 1.287-0.917 2.401-2.079 3.281-3.396z"></path>
+          </svg>
+        </button>
+        <button aria-label="Log in with GitHub" class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+            <path d="M16 0.396c-8.839 0-16 7.167-16 16 0 7.073 4.584 13.068 10.937 15.183 0.803 0.151 1.093-0.344 1.093-0.772 0-0.38-0.009-1.385-0.015-2.719-4.453 0.964-5.391-2.151-5.391-2.151-0.729-1.844-1.781-2.339-1.781-2.339-1.448-0.989 0.115-0.968 0.115-0.968 1.604 0.109 2.448 1.645 2.448 1.645 1.427 2.448 3.744 1.74 4.661 1.328 0.14-1.031 0.557-1.74 1.011-2.135-3.552-0.401-7.287-1.776-7.287-7.907 0-1.751 0.62-3.177 1.645-4.297-0.177-0.401-0.719-2.031 0.141-4.235 0 0 1.339-0.427 4.4 1.641 1.281-0.355 2.641-0.532 4-0.541 1.36 0.009 2.719 0.187 4 0.541 3.043-2.068 4.381-1.641 4.381-1.641 0.859 2.204 0.317 3.833 0.161 4.235 1.015 1.12 1.635 2.547 1.635 4.297 0 6.145-3.74 7.5-7.296 7.891 0.556 0.479 1.077 1.464 1.077 2.959 0 2.14-0.020 3.864-0.020 4.385 0 0.416 0.28 0.916 1.104 0.755 6.4-2.093 10.979-8.093 10.979-15.156 0-8.833-7.161-16-16-16z"></path>
+          </svg>
+        </button>
+      </div>
+      <p class="signup">Don't have an account? <a href="#" onclick="toggleForm()">Sign up</a></p>
+    </div>
+    <div id="signup-form" style="display:none;">
+      <p class="title">Sign Up</p>
+      <p class="subtitle">Create your account to get started.</p>
+      <form class="form slide-in">
+        <div class="input-group">
+          <label for="signup-username">Username</label>
+          <input type="text" name="signup-username" id="signup-username" placeholder="">
+        </div>
+        <div class="input-group">
+          <label for="signup-email">Email</label>
+          <input type="email" name="signup-email" id="signup-email" placeholder="">
+        </div>
+        <div class="input-group">
+          <label for="signup-password">Password</label>
+          <input type="password" name="signup-password" id="signup-password" placeholder="">
+        </div>
+        <div class="input-group">
+          <label for="signup-password2">Confirm Password</label>
+          <input type="password" name="signup-password2" id="signup-password2" placeholder="">
+        </div>
+        <button class="sign" type="submit">Sign up</button>
+      </form>
+      <div class="social-message">
+        <div class="line"></div>
+        <p class="message">Sign up with social accounts</p>
+        <div class="line"></div>
+      </div>
+      <div class="social-icons">
+        <button aria-label="Sign up with Google" class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+            <path d="M16.318 13.714v5.484h9.078c-0.37 2.354-2.745 6.901-9.078 6.901-5.458 0-9.917-4.521-9.917-10.099s4.458-10.099 9.917-10.099c3.109 0 5.193 1.318 6.38 2.464l4.339-4.182c-2.786-2.599-6.396-4.182-10.719-4.182-8.844 0-16 7.151-16 16s7.156 16 16 16c9.234 0 15.365-6.49 15.365-15.635 0-1.052-0.115-1.854-0.255-2.651z"></path>
+          </svg>
+        </button>
+        <button aria-label="Sign up with Twitter" class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+            <path d="M31.937 6.093c-1.177 0.516-2.437 0.871-3.765 1.032 1.355-0.813 2.391-2.099 2.885-3.631-1.271 0.74-2.677 1.276-4.172 1.579-1.192-1.276-2.896-2.079-4.787-2.079-3.625 0-6.563 2.937-6.563 6.557 0 0.521 0.063 1.021 0.172 1.495-5.453-0.255-10.287-2.875-13.52-6.833-0.568 0.964-0.891 2.084-0.891 3.303 0 2.281 1.161 4.281 2.916 5.457-1.073-0.031-2.083-0.328-2.968-0.817v0.079c0 3.181 2.26 5.833 5.26 6.437-0.547 0.145-1.131 0.229-1.724 0.229-0.421 0-0.823-0.041-1.224-0.115 0.844 2.604 3.26 4.5 6.14 4.557-2.239 1.755-5.077 2.801-8.135 2.801-0.521 0-1.041-0.025-1.563-0.088 2.917 1.86 6.36 2.948 10.079 2.948 12.067 0 18.661-9.995 18.661-18.651 0-0.276 0-0.557-0.021-0.839 1.287-0.917 2.401-2.079 3.281-3.396z"></path>
+          </svg>
+        </button>
+        <button aria-label="Sign up with GitHub" class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+            <path d="M16 0.396c-8.839 0-16 7.167-16 16 0 7.073 4.584 13.068 10.937 15.183 0.803 0.151 1.093-0.344 1.093-0.772 0-0.38-0.009-1.385-0.015-2.719-4.453 0.964-5.391-2.151-5.391-2.151-0.729-1.844-1.781-2.339-1.781-2.339-1.448-0.989 0.115-0.968 0.115-0.968 1.604 0.109 2.448 1.645 2.448 1.645 1.427 2.448 3.744 1.74 4.661 1.328 0.14-1.031 0.557-1.74 1.011-2.135-3.552-0.401-7.287-1.776-7.287-7.907 0-1.751 0.62-3.177 1.645-4.297-0.177-0.401-0.719-2.031 0.141-4.235 0 0 1.339-0.427 4.4 1.641 1.281-0.355 2.641-0.532 4-0.541 1.36 0.009 2.719 0.187 4 0.541 3.043-2.068 4.381-1.641 4.381-1.641 0.859 2.204 0.317 3.833 0.161 4.235 1.015 1.12 1.635 2.547 1.635 4.297 0 6.145-3.74 7.5-7.296 7.891 0.556 0.479 1.077 1.464 1.077 2.959 0 2.14-0.020 3.864-0.020 4.385 0 0.416 0.28 0.916 1.104 0.755 6.4-2.093 10.979-8.093 10.979-15.156 0-8.833-7.161-16-16-16z"></path>
+          </svg>
+        </button>
+      </div>
+      <p class="signup">Already have an account? <a href="#" onclick="toggleForm()">Login</a></p>
+    </div>
+  </div>
+</body>
+</html>

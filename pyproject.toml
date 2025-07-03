@@ -1,0 +1,30 @@
+[project]
+name = "repl-nix-workspace"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic>=0.50.0",
+    "arviz>=0.21.0",
+    "numpy>=2.2.5",
+    "openai>=1.76.0",
+    "pandas>=2.2.3",
+    "plotly>=6.0.1",
+    "prophet>=1.1.6",
+    "psycopg2-binary>=2.9.10",
+    "pymc>=5.22.0",
+    "reportlab>=4.4.0",
+    "scikit-learn>=1.6.1",
+    "scipy>=1.15.2",
+    "sqlalchemy>=2.0.40",
+    "statsmodels>=0.14.4",
+    "streamlit-javascript>=0.1.5",
+    "streamlit>=1.44.1",
+    "trafilatura>=2.0.0",
+    "svglib>=1.5.1",
+    "python-docx>=1.1.2",
+    "docxcompose>=1.4.0",
+    "matplotlib>=3.10.1",
+    "docxtpl>=0.19.1",
+    "xlsxwriter>=3.2.3",
+]
