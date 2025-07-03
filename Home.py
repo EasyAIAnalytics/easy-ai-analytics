@@ -12,6 +12,19 @@ from utils.pdf_generator import PDFGenerator
 from utils.docx_generator import DocxGenerator
 import database as db
 import plotly.io as pio
+from bs4 import BeautifulSoup
+import streamlit.components.v1 as components
+import bcrypt
+
+# Set a global Plotly template and colorway
+pio.templates.default = "plotly_white"
+CUSTOM_COLORWAY = ["#636EFA", "#EF553B", "#00CC96", "#AB63FA", "#FFA15A", "#19D3F3", "#FF6692", "#B6E880", "#FF97FF", "#FECB52"]
+
+# Load custom CSS for login/signup styling
+css_path = os.path.join("templates", "login.css")
+if os.path.exists(css_path):
+    with open(css_path) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 def create_sample_data():
     """Create sample data for demonstration"""
@@ -41,8 +54,112 @@ def create_sample_data():
         })
     return pd.DataFrame(sales_data)
 
+def show_login_signup():
+    st.set_page_config(page_title="Login / Signup", page_icon="🔐", layout="centered", initial_sidebar_state="collapsed")
+    hide_sidebar = """
+        <style>
+        [data-testid="stSidebar"], .css-1d391kg {display: none !important;}
+        .main {padding-top: 0rem !important;}
+        </style>
+    """
+    st.markdown(hide_sidebar, unsafe_allow_html=True)
+
+    if "show_signup" not in st.session_state:
+        st.session_state["show_signup"] = False
+    if "login_error" not in st.session_state:
+        st.session_state["login_error"] = ""
+    if "signup_error" not in st.session_state:
+        st.session_state["signup_error"] = ""
+    if "signup_success" not in st.session_state:
+        st.session_state["signup_success"] = ""
+
+    col1, col2, col3 = st.columns([1,2,1])
+    with col2:
+        # st.image("assets/logo.svg", width=80)  # Removed as requested
+        st.markdown("<h2 style='text-align:center;'>Easy AI Analytics</h2>", unsafe_allow_html=True)
+        st.markdown("<h4 style='text-align:center;'>Sign in to your account or create a new one</h4>", unsafe_allow_html=True)
+        st.markdown("---")
+
+        if not st.session_state["show_signup"]:
+            # Login Form
+            with st.form("login_form", clear_on_submit=False):
+                username = st.text_input("Username", key="login_username")
+                password = st.text_input("Password", type="password", key="login_password")
+                submitted = st.form_submit_button("Login")
+                if submitted:
+                    user = db.get_user_by_username(username)
+                    if not username or not password:
+                        st.session_state["login_error"] = "Please enter both username and password."
+                    elif user and user.get("password_hash") and bcrypt.checkpw(password.encode(), user["password_hash"].encode()):
+                        st.session_state.logged_in = True
+                        st.session_state.user_id = user["id"]
+                        st.session_state.username = user["username"]
+                        st.session_state["login_error"] = ""
+                        st.success("Login successful! Redirecting...")
+                        st.rerun()
+                    else:
+                        st.session_state["login_error"] = "Invalid username or password."
+                if st.session_state["login_error"]:
+                    st.error(st.session_state["login_error"])
+            st.markdown("<p style='text-align:center;'>Don't have an account? <a href='#' style='color:#636EFA;' onclick=\"window.parent.postMessage({toggleForm:true}, '*')\">Sign up</a></p>", unsafe_allow_html=True)
+            if st.button("Create a new account", key="show_signup_btn"):
+                st.session_state["show_signup"] = True
+                st.session_state["login_error"] = ""
+                st.rerun()
+        else:
+            # Signup Form
+            with st.form("signup_form", clear_on_submit=False):
+                username = st.text_input("Username", key="signup_username")
+                email = st.text_input("Email", key="signup_email")
+                password = st.text_input("Password", type="password", key="signup_password")
+                password2 = st.text_input("Confirm Password", type="password", key="signup_password2")
+                submitted = st.form_submit_button("Sign Up")
+                if submitted:
+                    if not username or not password or not email or not password2:
+                        st.session_state["signup_error"] = "Please fill in all fields."
+                        st.session_state["signup_success"] = ""
+                    elif password != password2:
+                        st.session_state["signup_error"] = "Passwords do not match."
+                        st.session_state["signup_success"] = ""
+                    elif db.get_user_by_username(username):
+                        st.session_state["signup_error"] = "Username already exists."
+                        st.session_state["signup_success"] = ""
+                    elif db.get_user_by_email(email):
+                        st.session_state["signup_error"] = "Email already registered."
+                        st.session_state["signup_success"] = ""
+                    else:
+                        hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+                        db.create_user(username, email, hashed)
+                        st.session_state["signup_error"] = ""
+                        st.session_state["signup_success"] = "Account created! Please log in."
+                        st.session_state["show_signup"] = False
+                        st.rerun()
+                if st.session_state["signup_error"]:
+                    st.error(st.session_state["signup_error"])
+                if st.session_state["signup_success"]:
+                    st.success(st.session_state["signup_success"])
+            st.markdown("<p style='text-align:center;'>Already have an account?</p>", unsafe_allow_html=True)
+            if st.button("Back to Login", key="show_login_btn"):
+                st.session_state["show_signup"] = False
+                st.session_state["signup_error"] = ""
+                st.session_state["signup_success"] = ""
+                st.rerun()
+
 def main():
-    # Page configuration
+    # Show login page if not logged in
+    if not st.session_state.get("logged_in", False):
+        show_login_signup()
+        st.stop()
+
+    # Add logout button to all pages
+    col1, col2 = st.columns([8, 1])
+    with col2:
+        if st.button("Logout", key="logout_btn"):
+            for k in list(st.session_state.keys()):
+                del st.session_state[k]
+            st.rerun()
+
+    # Page configuration for main app
     st.set_page_config(
         page_title="Easy AI Analytics",
         page_icon="📊",
@@ -96,11 +213,10 @@ def main():
     check_db_connection()
 
     # Main layout with tabs
-    tab1, tab2, tab3, tab4 = st.tabs([
+    tab1, tab2, tab3 = st.tabs([
         "📤 Upload & Explore",
         "📊 Visualize",
-        "📝 Generate Report",
-        "💾 Saved Data"
+        "📝 Generate Report"
     ])
 
     # Tab 1: Upload & Explore
@@ -351,55 +467,6 @@ def main():
                     st.rerun()
                 except Exception as e:
                     st.error(f"Error converting data type: {e}")
-            
-            # Save processed data
-            if st.session_state.db_connected:
-                st.markdown("### Save Dataset")
-                
-                col1, col2 = st.columns(2)
-                
-                with col1:
-                    dataset_name = st.text_input("Dataset Name", f"Processed {st.session_state.file_name}")
-                    dataset_description = st.text_area("Description", "Dataset processed with Easy AI Analytics")
-                    
-                    if st.button("Save to Database"):
-                        try:
-                            dataset_id = db.save_dataset(
-                                name=dataset_name,
-                                description=dataset_description,
-                                df=st.session_state.data,
-                                file_name=st.session_state.file_name
-                            )
-                            
-                            if dataset_id:
-                                st.success(f"Dataset saved successfully with ID: {dataset_id}")
-                            else:
-                                st.error("Failed to save dataset")
-                        except Exception as e:
-                            st.error(f"Error saving dataset: {e}")
-                
-                with col2:
-                    st.markdown("#### Download Processed Data")
-                    # CSV Download
-                    csv_data = st.session_state.data.to_csv(index=False).encode('utf-8')
-                    st.download_button(
-                        label="Download as CSV",
-                        data=csv_data,
-                        file_name=f"processed_{st.session_state.file_name.split('.')[0]}.csv",
-                        mime="text/csv"
-                    )
-                    
-                    # Excel Download
-                    buffer = io.BytesIO()
-                    with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-                        st.session_state.data.to_excel(writer, sheet_name='Data', index=False)
-                        
-                    st.download_button(
-                        label="Download as Excel",
-                        data=buffer.getvalue(),
-                        file_name=f"processed_{st.session_state.file_name.split('.')[0]}.xlsx",
-                        mime="application/vnd.ms-excel"
-                    )
             
             st.markdown("</div>", unsafe_allow_html=True)
         else:
@@ -793,6 +860,7 @@ def main():
                                         }
                                     )
                             
+                            fig.update_layout(font=dict(family="Arial, sans-serif", size=16), legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1), margin=dict(l=40, r=40, t=60, b=40))
                             st.plotly_chart(fig, use_container_width=True)
                             img_bytes = fig.to_image(format="png")
                             st.download_button("Download as PNG", data=img_bytes, file_name="bar_chart.png", mime="image/png")
@@ -859,6 +927,7 @@ def main():
                             else:
                                 fig.update_traces(textposition='inside', textinfo='label')
                             
+                            fig.update_layout(font=dict(family="Arial, sans-serif", size=16), legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1), margin=dict(l=40, r=40, t=60, b=40))
                             st.plotly_chart(fig, use_container_width=True)
                             img_bytes = fig.to_image(format="png")
                             st.download_button("Download as PNG", data=img_bytes, file_name="pie_chart.png", mime="image/png")
@@ -921,6 +990,7 @@ def main():
                             if show_points:
                                 fig.update_traces(boxpoints="all", jitter=0.3)
                             
+                            fig.update_layout(font=dict(family="Arial, sans-serif", size=16), legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1), margin=dict(l=40, r=40, t=60, b=40))
                             st.plotly_chart(fig, use_container_width=True)
                             img_bytes = fig.to_image(format="png")
                             st.download_button("Download as PNG", data=img_bytes, file_name="box_plot.png", mime="image/png")
@@ -1031,6 +1101,7 @@ def main():
                                 name="Density Curve"
                             )
                         
+                        fig.update_layout(font=dict(family="Arial, sans-serif", size=16), legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1), margin=dict(l=40, r=40, t=60, b=40))
                         st.plotly_chart(fig, use_container_width=True)
                         img_bytes = fig.to_image(format="png")
                         st.download_button("Download as PNG", data=img_bytes, file_name="histogram.png", mime="image/png")
@@ -1063,133 +1134,98 @@ def main():
         else:
             st.warning("Please upload data in the Upload & Explore tab first")
 
-    # Tab 3: AI Analytics (replace with dev/premium message)
+    # Tab 3: Generate Report
     with tab3:
-        st.markdown('### AI-Powered Analytics')
-        st.info('[dev in progress, or requires a premium sub plan to access]')
-        st.stop()
-
-    # Tab 4: Saved Data
-    with tab4:
-        if st.session_state.db_connected:
-            st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
-            st.markdown("### Saved Datasets")
-            
-            # Refresh data
-            if st.button("Refresh Datasets"):
-                st.rerun()
-            
-            # Get datasets from database
-            datasets = db.get_all_datasets()
-            
-            if datasets:
-                # Display datasets in a table
-                dataset_data = []
-                for dataset_id, name, description, file_name, created_at in datasets:
-                    dataset_data.append({
-                        "ID": dataset_id,
-                        "Name": name,
-                        "Description": description,
-                        "Filename": file_name,
-                        "Created At": created_at
-                    })
-                
-                dataset_df = pd.DataFrame(dataset_data)
-                st.dataframe(dataset_df, use_container_width=True)
-                
-                # Select dataset to load
-                selected_dataset_id = st.selectbox(
-                    "Select a dataset to load",
-                    options=dataset_df["ID"].tolist(),
-                    format_func=lambda x: f"{dataset_df[dataset_df['ID'] == x]['Name'].iloc[0]} (ID: {x})"
-                )
-                
-                if st.button("Load Selected Dataset"):
-                    loaded_df = db.get_dataset(selected_dataset_id)
-                    if loaded_df is not None:
-                        st.session_state.data = loaded_df
-                        st.session_state.file_name = dataset_df[dataset_df["ID"] == selected_dataset_id]["Filename"].iloc[0]
-                        st.success(f"Dataset loaded successfully!")
-                        st.rerun()
+        st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
+        st.markdown("### Generate Custom Report")
+        with st.form("report_form"):
+            company_name = st.text_input("Company Name")
+            report_title = st.text_input("Report Title")
+            notes = st.text_area("Additional Notes (optional)")
+            st.markdown("#### Select charts/diagrams to include in the report:")
+            # For demo: let user select from available chart types
+            chart_options = [
+                "Missing Values Heatmap",
+                "Distribution Analysis",
+                "Correlation Matrix",
+                "Scatter Plot",
+                "Line Chart",
+                "Bar Chart",
+                "Pie Chart",
+                "Box Plot",
+                "Histogram"
+            ]
+            selected_charts = st.multiselect("Charts/Diagrams", chart_options)
+            submit_report = st.form_submit_button("Generate Report")
+        if submit_report:
+            if not company_name or not report_title or not selected_charts:
+                st.error("Please fill in the company name, report title, and select at least one chart/diagram.")
+            else:
+                # Generate the selected charts as images
+                visualizer = Visualizer(st.session_state.data)
+                chart_images = []
+                for chart in selected_charts:
+                    if chart == "Missing Values Heatmap":
+                        fig = visualizer.plot_missing_values()
+                    elif chart == "Distribution Analysis":
+                        # Use first numeric column for demo
+                        numeric_cols = st.session_state.data.select_dtypes(include=['number']).columns.tolist()
+                        if numeric_cols:
+                            fig = visualizer.plot_numeric_distribution(numeric_cols[0])
+                    elif chart == "Correlation Matrix":
+                        fig = visualizer.plot_correlation_matrix()
+                    elif chart == "Scatter Plot":
+                        numeric_cols = st.session_state.data.select_dtypes(include=['number']).columns.tolist()
+                        if len(numeric_cols) >= 2:
+                            fig = visualizer.plot_scatter(numeric_cols[0], numeric_cols[1])
+                    elif chart == "Line Chart":
+                        # Use first datetime and numeric column for demo
+                        datetime_cols = [col for col in st.session_state.data.columns if pd.api.types.is_datetime64_any_dtype(st.session_state.data[col])]
+                        numeric_cols = st.session_state.data.select_dtypes(include=['number']).columns.tolist()
+                        if datetime_cols and numeric_cols:
+                            fig = px.line(st.session_state.data, x=datetime_cols[0], y=numeric_cols[0])
+                    elif chart == "Bar Chart":
+                        all_cols = st.session_state.data.columns.tolist()
+                        numeric_cols = st.session_state.data.select_dtypes(include=['number']).columns.tolist()
+                        if all_cols and numeric_cols:
+                            fig = px.bar(st.session_state.data, x=all_cols[0], y=numeric_cols[0])
+                    elif chart == "Pie Chart":
+                        all_cols = st.session_state.data.columns.tolist()
+                        numeric_cols = st.session_state.data.select_dtypes(include=['number']).columns.tolist()
+                        if all_cols and numeric_cols:
+                            fig = px.pie(st.session_state.data, names=all_cols[0], values=numeric_cols[0])
+                    elif chart == "Box Plot":
+                        numeric_cols = st.session_state.data.select_dtypes(include=['number']).columns.tolist()
+                        if numeric_cols:
+                            fig = px.box(st.session_state.data, y=numeric_cols[0])
+                    elif chart == "Histogram":
+                        numeric_cols = st.session_state.data.select_dtypes(include=['number']).columns.tolist()
+                        if numeric_cols:
+                            fig = px.histogram(st.session_state.data, x=numeric_cols[0])
                     else:
-                        st.error("Failed to load dataset from database.")
-            else:
-                st.info("No datasets found in the database.")
-            
-            st.markdown("</div>", unsafe_allow_html=True)
-            
-            st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
-            st.markdown("### Saved Reports")
-            
-            # Refresh reports
-            if st.button("Refresh Reports"):
-                st.rerun()
-            
-            # Get reports from database
-            reports = db.get_all_reports()
-            
-            if reports:
-                # Display reports in a table
-                report_data = []
-                for report_id, title, company_name, description, created_at in reports:
-                    report_data.append({
-                        "ID": report_id,
-                        "Title": title,
-                        "Company": company_name,
-                        "Description": description,
-                        "Created At": created_at
-                    })
-                
-                report_df = pd.DataFrame(report_data)
-                st.dataframe(report_df, use_container_width=True)
-                
-                # Select report to view
-                col1, col2 = st.columns(2)
-                
-                with col1:
-                    selected_report_id = st.selectbox(
-                        "Select a report to view",
-                        options=report_df["ID"].tolist(),
-                        format_func=lambda x: f"{report_df[report_df['ID'] == x]['Title'].iloc[0]} (ID: {x})"
-                    )
-                
-                with col2:
-                    report_format = st.radio(
-                        "Select format",
-                        options=["PDF", "DOCX"],
-                        horizontal=True
-                    )
-                
-                if st.button("Download Selected Report"):
-                    try:
-                        report_data = db.get_report(selected_report_id, format=report_format.lower())
-                        if report_data:
-                            title = report_df[report_df["ID"] == selected_report_id]["Title"].iloc[0]
-                            
-                            if report_format == "PDF":
-                                file_ext = "pdf"
-                                mime_type = "application/pdf"
-                            else:
-                                file_ext = "docx"
-                                mime_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                            
-                            # Download button
-                            st.download_button(
-                                label=f"Download {report_format} Report",
-                                data=report_data,
-                                file_name=f"{title.replace(' ', '_')}.{file_ext}",
-                                mime=mime_type
-                            )
-                        else:
-                            st.error(f"Report not available in {report_format} format.")
-                    except Exception as e:
-                        st.error(f"Error downloading report: {e}")
-            else:
-                st.info("No reports found in the database.")
-            
-            st.markdown("</div>", unsafe_allow_html=True)
-        else:
-            st.warning("Database connection is required to view saved data.")
+                        continue
+                    fig.update_layout(font=dict(family="Arial, sans-serif", size=16), legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1), margin=dict(l=40, r=40, t=60, b=40))
+                    img_bytes = fig.to_image(format="png")
+                    chart_images.append((chart, img_bytes))
+                # Generate PDF report
+                form_data = {
+                    "company_name": company_name,
+                    "project_title": report_title,
+                    "objectives": notes,  # or add more fields as needed
+                    "target_audience": "",
+                    "timeframe": "",
+                    "key_metrics": ""
+                }
+                pdf_gen = PDFGenerator(form_data, st.session_state.data, st.session_state.insights, chart_images=chart_images)
+                pdf_bytes = pdf_gen.generate_pdf()
+                st.success("Report generated!")
+                st.download_button(
+                    label="Download PDF Report",
+                    data=pdf_bytes,
+                    file_name=f"{report_title.replace(' ', '_')}.pdf",
+                    mime="application/pdf"
+                )
+        st.markdown('</div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()

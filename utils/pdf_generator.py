@@ -4,19 +4,20 @@ import numpy as np
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, HRFlowable
 from reportlab.lib.units import inch
 import plotly.io as pio
 import tempfile
 import os
 import datetime
+from reportlab.lib.enums import TA_CENTER
 
 class PDFGenerator:
     """
     Class for generating PDF reports
     """
     
-    def __init__(self, form_data, data, insights, missing_fig=None, numeric_fig=None, categorical_fig=None):
+    def __init__(self, form_data, data, insights, chart_images=None, missing_fig=None, numeric_fig=None, categorical_fig=None):
         """
         Initialize the PDFGenerator
         
@@ -24,6 +25,7 @@ class PDFGenerator:
             form_data (dict): Form data submitted by user
             data (pd.DataFrame): The dataset being analyzed
             insights (list): List of insights generated from the data
+            chart_images (list): List of (chart_name, image_bytes) tuples
             missing_fig (plotly.graph_objects.Figure, optional): Missing values chart
             numeric_fig (plotly.graph_objects.Figure, optional): Numeric distribution chart
             categorical_fig (plotly.graph_objects.Figure, optional): Categorical distribution chart
@@ -31,10 +33,10 @@ class PDFGenerator:
         self.form_data = form_data
         self.data = data
         self.insights = insights if insights else []
+        self.chart_images = chart_images if chart_images else []
         self.missing_fig = missing_fig
         self.numeric_fig = numeric_fig
         self.categorical_fig = categorical_fig
-        # Initialize temp_images as instance variable to avoid scoping issues
         self.temp_images = []
         
     def _save_figure_as_image(self, fig):
@@ -106,37 +108,45 @@ class PDFGenerator:
             
         content.append(Spacer(1, 0.1*inch))
         
-        # Add title
-        title_style = styles['Title']
-        content.append(Paragraph("Easy AI Analytics Report", title_style))
-        content.append(Spacer(1, 0.25*inch))
+        # Center the main title and add more spacing
+        centered_title_style = ParagraphStyle(
+            name='CenteredTitle', parent=styles['Title'], alignment=TA_CENTER, fontSize=22, spaceAfter=18
+        )
+        content.append(Paragraph("Easy AI Analytics Report", centered_title_style))
+        content.append(Spacer(1, 0.35*inch))
+        
+        # Add a horizontal rule function
+        def add_section_divider():
+            content.append(Spacer(1, 0.1*inch))
+            content.append(HRFlowable(width="100%", thickness=1, color=colors.grey))
+            content.append(Spacer(1, 0.1*inch))
         
         # Add company and project info
         company_style = styles['Heading1']
         content.append(Paragraph(f"Company: {self.form_data.get('company_name', 'N/A')}", company_style))
         content.append(Paragraph(f"Project: {self.form_data.get('project_title', 'N/A')}", company_style))
-        content.append(Spacer(1, 0.1*inch))
+        add_section_divider()
         
         # Add date
         date_style = styles['Normal']
         content.append(Paragraph(f"Report Date: {datetime.datetime.now().strftime('%Y-%m-%d')}", date_style))
-        content.append(Spacer(1, 0.25*inch))
+        add_section_divider()
         
         # Add business objectives
         section_style = styles['Heading2']
         content.append(Paragraph("Business Objectives", section_style))
         content.append(Paragraph(self.form_data.get('objectives', 'N/A'), styles['Normal']))
-        content.append(Spacer(1, 0.2*inch))
+        add_section_divider()
         
         # Add target audience
         content.append(Paragraph("Target Audience", section_style))
         content.append(Paragraph(self.form_data.get('target_audience', 'N/A'), styles['Normal']))
-        content.append(Spacer(1, 0.2*inch))
+        add_section_divider()
         
         # Add timeframe
         content.append(Paragraph("Analysis Timeframe", section_style))
         content.append(Paragraph(self.form_data.get('timeframe', 'N/A'), styles['Normal']))
-        content.append(Spacer(1, 0.2*inch))
+        add_section_divider()
         
         # Add dataset overview with error handling
         content.append(Paragraph("Dataset Overview", section_style))
@@ -146,7 +156,7 @@ class PDFGenerator:
             content.append(Paragraph(f"Missing Values: {self.data.isna().sum().sum()}", styles['Normal']))
         else:
             content.append(Paragraph("No data available for analysis", styles['Normal']))
-        content.append(Spacer(1, 0.2*inch))
+        add_section_divider()
         
         # Add visualizations if available
         if any([self.missing_fig, self.numeric_fig, self.categorical_fig]):
@@ -182,10 +192,23 @@ class PDFGenerator:
                 except Exception as e:
                     content.append(Paragraph(f"Error generating categorical distribution chart: {e}", styles['Normal']))
         
+        # Add visualizations from chart_images
+        if self.chart_images:
+            for chart_name, img_bytes in self.chart_images:
+                with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as temp_img:
+                    temp_img.write(img_bytes)
+                    temp_img_path = temp_img.name
+                    self.temp_images.append(temp_img_path)
+                content.append(Paragraph(chart_name, styles['Heading3']))
+                content.append(
+                    Image(temp_img_path, width=6.5*inch, height=4.5*inch, hAlign='CENTER')
+                )
+                content.append(Spacer(1, 0.2*inch))
+        
         # Add key metrics
         content.append(Paragraph("Key Metrics to Track", section_style))
         content.append(Paragraph(self.form_data.get('key_metrics', 'N/A'), styles['Normal']))
-        content.append(Spacer(1, 0.2*inch))
+        add_section_divider()
         
         # Add insights
         content.append(Paragraph("Data Insights", section_style))
@@ -196,45 +219,23 @@ class PDFGenerator:
         # Add sample data table
         content.append(Paragraph("Data Sample", section_style))
         
-        # Create the table data including headers - handling potential None or empty DataFrame
+        # For the data sample, use a well-formatted table
         if self.data is not None and not self.data.empty:
-            # Convert any problematic columns to string type (especially datetime columns)
-            safe_data = self.data.copy()
-            for col in safe_data.columns:
-                if pd.api.types.is_datetime64_any_dtype(safe_data[col]):
-                    safe_data[col] = safe_data[col].dt.strftime('%Y-%m-%d %H:%M:%S')
-            
-            table_data = [safe_data.columns.tolist()]
-            
-            # Add up to 5 rows of data
-            for i in range(min(5, len(safe_data))):
-                row_data = []
-                for cell in safe_data.iloc[i].values:
-                    if isinstance(cell, (pd.Timestamp, np.datetime64)):
-                        row_data.append(str(pd.Timestamp(cell).strftime('%Y-%m-%d %H:%M:%S')))
-                    else:
-                        row_data.append(str(cell))
-                table_data.append(row_data)
-        else:
-            # If no data is available, create a simple table with a message
-            table_data = [["No Data Available"]]
-        
-        # Create the table
-        table = Table(table_data)
-        
-        # Add style to the table
-        table_style = TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black)
-        ])
-        table.setStyle(table_style)
-        
-        content.append(table)
+            sample_df = self.data.head(5)
+            table_data = [sample_df.columns.tolist()] + sample_df.values.tolist()
+            table = Table(table_data, hAlign='LEFT')
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#636EFA')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 11),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.whitesmoke),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ]))
+            content.append(table)
+            content.append(Spacer(1, 0.2*inch))
         
         # Ensure self.temp_images is defined
         if not hasattr(self, 'temp_images'):
