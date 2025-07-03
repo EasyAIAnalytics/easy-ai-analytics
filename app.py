@@ -2,18 +2,29 @@ import streamlit as st
 import database as db
 import bcrypt
 import importlib
+import os
 
-# --- PAGE REGISTRY ---
-PAGES = {
+st.set_page_config(page_title="Easy AI Analytics", page_icon="🧠", layout="wide")
+
+# --- Page Registry ---
+RAW_PAGES = {
     "Home": "Home",
     "Data Enrichment": "pages.Data_Enrichment",
     "Advanced Statistics": "pages.Advanced_Statistics",
     "AI Analytics": "pages.AI_Analytics",
     "Business Features": "pages.Business_Features",
+    "Database Management": "pages.Database_Management",  # Will be filtered if not present
     "Advanced Formulas": "pages.Advanced_Formulas",
 }
 
-# --- ROUTING LOGIC ---
+# Only include pages that physically exist
+PAGES = {
+    title: path
+    for title, path in RAW_PAGES.items()
+    if os.path.exists(path.replace(".", "/") + ".py")
+}
+
+# --- Logout UI ---
 def show_logout():
     col1, col2 = st.columns([8, 1])
     with col2:
@@ -22,8 +33,8 @@ def show_logout():
                 del st.session_state[k]
             st.rerun()
 
+# --- Login UI ---
 def show_login():
-    st.set_page_config(page_title="Login", page_icon="🔐", layout="centered")
     st.markdown("<h2 style='text-align:center;'>Login to Easy AI Analytics</h2>", unsafe_allow_html=True)
     error = None
     with st.form("login_form"):
@@ -43,8 +54,8 @@ def show_login():
         st.error(error)
     st.markdown("<p style='text-align:center;'>Don't have an account? <a href='?page=signup'>Sign up</a></p>", unsafe_allow_html=True)
 
+# --- Signup UI ---
 def show_signup():
-    st.set_page_config(page_title="Sign Up", page_icon="📝", layout="centered")
     st.markdown("<h2 style='text-align:center;'>Create Your Account</h2>", unsafe_allow_html=True)
     error = None
     with st.form("signup_form"):
@@ -66,9 +77,9 @@ def show_signup():
         st.error(error)
     st.markdown("<p style='text-align:center;'>Already have an account? <a href='?page=login'>Login</a></p>", unsafe_allow_html=True)
 
-# --- MAIN ROUTER ---
-query_params = st.query_params
-page = query_params.get("page", "home").lower()
+# --- Main App Router ---
+query_params = st.experimental_get_query_params()
+page = query_params.get("page", ["home"])[0].lower()
 
 if "user_id" not in st.session_state:
     if page == "signup":
@@ -77,13 +88,14 @@ if "user_id" not in st.session_state:
         show_login()
 else:
     show_logout()
-    # Main app navigation (tabs)
     tab_names = list(PAGES.keys())
-    default_tab = tab_names[0]
     selected_tab = st.selectbox("Navigation", tab_names, key="main_nav")
     module_name = PAGES[selected_tab]
-    module = importlib.import_module(module_name)
-    if hasattr(module, "main"):
-        module.main()
-    else:
-        st.error("This page does not have a main() function.") 
+    try:
+        module = importlib.import_module(module_name)
+        if hasattr(module, "main"):
+            module.main()
+        else:
+            st.error(f"Module `{module_name}` does not have a `main()` function.")
+    except Exception as e:
+        st.error(f"Error loading module `{module_name}`: {e}")
