@@ -27,3 +27,6 @@ kaleido
 bs4
 scipy
 statsmodels
+beautifulsoup4
+fpdf
+cairosvg
