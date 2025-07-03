@@ -78,13 +78,17 @@ if "user_id" not in st.session_state:
         show_login()
 else:
     show_logout()
-    # Main app navigation (tabs)
     tab_names = list(PAGES.keys())
-    default_tab = tab_names[0]
     selected_tab = st.selectbox("Navigation", tab_names, key="main_nav")
-    module_name = PAGES[selected_tab]
-    module = importlib.import_module(module_name)
-    if hasattr(module, "main"):
-        module.main()
-    else:
-        st.error("This page does not have a main() function.") 
+    selected_module = PAGES[selected_tab]
+
+    try:
+        module = importlib.import_module(selected_module)
+        if hasattr(module, "main"):
+            module.main()
+        else:
+            st.error("This page does not have a main() function.")
+    except ModuleNotFoundError:
+        st.error(f"The module `{selected_module}` could not be found.")
+    except Exception as e:
+        st.error(f"An error occurred while loading `{selected_module}`: {e}")
