@@ -25,5 +25,5 @@ docxtpl
 plotly
 kaleido
 bs4
-scipy
+scipy==1.10.1
 statsmodels
