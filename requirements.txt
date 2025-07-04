@@ -8,7 +8,6 @@ kaleido
 openpyxl
 xlsxwriter
 matplotlib
-scipy
 jinja2
 python-docx
 reportlab
